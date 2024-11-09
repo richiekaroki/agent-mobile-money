@@ -1,24 +1,42 @@
-<!-- src/components/TransactionModal.vue -->
 <template>
-  <div v-if="transaction" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg">
-      <h2 class="text-xl font-semibold mb-4">Transaction Details</h2>
-      <p><strong>Date:</strong> {{ transaction.date }}</p>
-      <p><strong>Type:</strong> {{ transaction.type }}</p>
-      <p><strong>Amount:</strong> {{ transaction.amount }} KES</p>
-      <p><strong>Status:</strong> Completed</p>
-      <button @click="close" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Close</button>
+  <div class="p-4 bg-white rounded shadow">
+    <h2 class="text-xl font-bold">Agent Profile</h2>
+    <div v-if="loading">Loading...</div>
+    <div v-else-if="error" class="text-red-500">{{ error }}</div>
+    <div v-else>
+      <p>
+        Name: <span class="font-medium">{{ profile.name }}</span>
+      </p>
+      <p>
+        Balance: <span class="font-medium">{{ profile.balance }} KES</span>
+      </p>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
+
 export default {
-  props: ['transaction'],
-  methods: {
-    close() {
-      this.$emit('close');
-    },
+  name: 'AgentProfile',
+  setup() {
+    const store = useStore()
+    const profile = computed(() => store.getters.getAgentProfile)
+    const loading = ref(true)
+    const error = ref(null)
+
+    onMounted(async () => {
+      try {
+        await store.dispatch('fetchAgentProfile')
+      } catch (e) {
+        error.value = 'Failed to load profile'
+      } finally {
+        loading.value = false
+      }
+    })
+
+    return { profile, loading, error }
   },
-};
+}
 </script>

@@ -3,52 +3,45 @@
   <div class="p-6 bg-gray-100 min-h-screen">
     <h1 class="text-2xl font-bold mb-4">Transactions</h1>
 
-    <!-- Filters Form -->
-    <div class="mb-4 p-4 bg-white rounded shadow">
-      <h2 class="text-lg font-semibold">Filter Transactions</h2>
-      <div class="flex space-x-4 mt-4">
-        <input
-          type="date"
-          v-model="dateFilter"
-          placeholder="Select date"
-          class="border px-2 py-1 rounded"
-        />
-        <select v-model="typeFilter" class="border px-2 py-1 rounded">
-          <option value="">All Types</option>
-          <option value="deposit">Deposit</option>
-          <option value="withdrawal">Withdrawal</option>
-        </select>
-      </div>
-    </div>
+    <!-- Filters and Transaction List -->
+    <TransactionList
+      :startDate="startDate"
+      :endDate="endDate"
+      :typeFilter="selectedType"
+      :page="currentPage"
+      :transactionsPerPage="5"
+      @selectTransaction="selectTransaction"
+      @changePage="changePage"
+    />
 
-    <!-- Transaction List Component with Filters -->
-    <TransactionList :dateFilter="dateFilter" :typeFilter="typeFilter" />
+    <!-- Transaction Modal -->
+    <TransactionModal
+      v-if="selectedTransaction"
+      :transaction="selectedTransaction"
+      @close="selectedTransaction = null"
+    />
   </div>
 </template>
 
 <script>
-import { onMounted } from 'vue';
-import { useStore } from 'vuex';
-import TransactionList from '../components/TransactionList.vue';
+import { ref } from 'vue'
+import TransactionList from '../components/TransactionList.vue'
+import TransactionModal from '../components/TransactionModal.vue'
 
 export default {
-  name: 'TransactionsView',
-  components: {
-    TransactionList,
-  },
-  data() {
-    return {
-      dateFilter: '',
-      typeFilter: '',
-    };
-  },
+  components: { TransactionList, TransactionModal },
   setup() {
-    const store = useStore();
+    const selectedTransaction = ref(null)
 
-    // Fetch transactions when the component mounts
-    onMounted(() => {
-      store.dispatch('fetchTransactions');
-    });
+    const selectTransaction = (transaction) => {
+      selectedTransaction.value = transaction
+    }
+
+    const changePage = (newPage) => {
+      currentPage.value = newPage
+    }
+
+    return { selectedTransaction, selectTransaction }
   },
-};
+}
 </script>

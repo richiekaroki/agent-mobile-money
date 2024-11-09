@@ -2,7 +2,7 @@
 <template>
   <div>
     <header class="p-4 bg-blue-600 text-white text-center">
-      <h1 class="text-3xl font-semibold">Mobile Money Agent</h1>
+      <h1 class="text-3xl font-semibold">Mobile Money Agent Dashboard</h1>
       <nav class="mt-4">
         <router-link to="/" class="px-4 py-2 text-white hover:bg-blue-500">Dashboard</router-link>
         <router-link to="/transactions" class="px-4 py-2 text-white hover:bg-blue-500"
@@ -11,7 +11,7 @@
       </nav>
     </header>
 
-    <NotificationComponent />
+    <NotificationComponent/>
 
     <main class="mt-6">
       <router-view />
@@ -20,13 +20,13 @@
 </template>
 
 <script>
-import NotificationComponent from './components/NotificationComponent.vue'
+import NotificationComponent from './components/NotificationComponent.vue';
 
 export default {
   name: 'App',
   components: {
-    NotificationComponent,
-  },
+    NotificationComponent
+  }
 }
 </script>
 

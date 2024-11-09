@@ -1,14 +1,22 @@
-<!-- src/components/AgentProfile.vue -->
+<!-- src/views/AgentProfile.vue -->
 <template>
   <div class="p-4 bg-white rounded shadow">
     <h2 class="text-xl font-bold">Agent Profile</h2>
-    <p>Name: {{ profile.name }}</p>
-    <p>Balance: {{ profile.balance }} KES</p>
+    <div v-if="loading"></div>
+    <div v-else-if="error" class="text-red-500">{{ error }}</div>
+    <div v-else>
+      <p>
+        Name: <span class="font-medium">{{ profile.name }}</span>
+      </p>
+      <p>
+        Balance: <span class="font-medium">{{ profile.balance }} KES</span>
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -16,12 +24,20 @@ export default {
   setup() {
     const store = useStore()
     const profile = computed(() => store.getters.getAgentProfile)
+    const loading = ref(true)
+    const error = ref(null)
 
-    onMounted(() => {
-      store.dispatch('fetchAgentProfile')
+    onMounted(async () => {
+      try {
+        await store.dispatch('fetchAgentProfile')
+      } catch (e) {
+        error.value = 'Failed to load profile'
+      } finally {
+        loading.value = false
+      }
     })
 
-    return { profile }
+    return { profile, loading, error }
   },
 }
 </script>
