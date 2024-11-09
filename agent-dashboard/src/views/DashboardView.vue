@@ -1,22 +1,33 @@
 <template>
   <div class="p-6 bg-gray-100 min-h-screen">
     <!-- Centered Dashboard Heading -->
-    <h1 class="text-4xl font-bold text-center mb-8 text-blue-600">Financial Dashboard</h1>
+    <h1
+      class="text-4xl font-bold text-center mb-8 text-blue-600"
+      aria-label="Financial Dashboard Heading"
+    >
+      Financial Dashboard
+    </h1>
 
     <!-- Financial Summary Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <div class="p-6 bg-white rounded-lg shadow-md flex items-center justify-between">
-        <div class="text-lg font-semibold">Total Balance</div>
-        <div class="text-2xl font-bold text-green-500">KES 25,000</div>
-      </div>
-      <div class="p-6 bg-white rounded-lg shadow-md flex items-center justify-between">
-        <div class="text-lg font-semibold">Total Transactions</div>
-        <div class="text-2xl font-bold text-blue-500">350</div>
-      </div>
-      <div class="p-6 bg-white rounded-lg shadow-md flex items-center justify-between">
-        <div class="text-lg font-semibold">Pending Transactions</div>
-        <div class="text-2xl font-bold text-yellow-500">5</div>
-      </div>
+      <SummaryCard
+        title="Total Balance"
+        :value="totalBalance"
+        colorClass="text-green-500"
+        aria-label="Total Balance Card"
+      />
+      <SummaryCard
+        title="Total Transactions"
+        :value="totalTransactions"
+        colorClass="text-blue-500"
+        aria-label="Total Transactions Card"
+      />
+      <SummaryCard
+        title="Pending Transactions"
+        :value="pendingTransactions"
+        colorClass="text-yellow-500"
+        aria-label="Pending Transactions Card"
+      />
     </div>
 
     <!-- Agent Profile Section -->
@@ -32,20 +43,27 @@
 </template>
 
 <script>
-import AgentProfile from '../components/AgentProfile.vue';
-import TransactionChart from '../components/TransactionChart.vue';
+import SummaryCard from '../components/SummaryCard.vue'
 
 export default {
   name: 'DashboardView',
   components: {
-    AgentProfile,
-    TransactionChart,
+    SummaryCard,
+    AgentProfile: () => import('../components/AgentProfile.vue'),
+    TransactionChart: () => import('../components/TransactionChart.vue'),
   },
-};
+  data() {
+    return {
+      totalBalance: 'KES 25,000',
+      totalTransactions: 350,
+      pendingTransactions: 5,
+    }
+  },
+}
 </script>
 
 <style scoped>
-/* Optional: You can style the grid layout here for a better responsive design */
+/* Optional: You can style the grid layout here for better responsive design */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
