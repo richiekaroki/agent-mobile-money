@@ -1,7 +1,6 @@
 <!-- src/views/TransactionsView.vue -->
 <template>
   <div class="p-6 bg-gray-100 min-h-screen">
-    <h1 class="text-2xl font-bold mb-4">Transactions</h1>
 
     <!-- Filters and Transaction List -->
     <TransactionList

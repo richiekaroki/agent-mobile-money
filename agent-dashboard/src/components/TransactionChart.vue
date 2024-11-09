@@ -18,73 +18,75 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from 'vue';
-import { Chart, registerables } from 'chart.js';
-import { useStore } from 'vuex'; // Import Vuex for state management
+import { Chart, registerables } from 'chart.js'
+import { onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-Chart.register(...registerables);
+Chart.register(...registerables)
 
 export default {
   name: 'TransactionChart',
   setup() {
-    const store = useStore();
-    const chartRef = ref(null);
-    let chartInstance = null;
+    const store = useStore()
+    const chartRef = ref(null)
+    let chartInstance = null
 
     // Date range filters
-    const startDate = ref('');
-    const endDate = ref('');
+    const startDate = ref('')
+    const endDate = ref('')
 
     // Fetch transactions from Vuex store
-    const transactions = ref([]);
-    onMounted(() => {
-      transactions.value = store.getters.getTransactions; // Use Vuex getter
-      generateChart(); // Initial chart generation
-    });
+    const transactions = ref([])
+
+    // Fetch transactions from the store on mount
+    onMounted(async () => {
+      transactions.value = await store.getters.getTransactions // Make sure this resolves correctly
+      generateChart() // Generate the chart after data is fetched
+    })
 
     // Watch for changes in Vuex store data or filters
     watch(
       () => store.getters.getTransactions,
-      (newTransactions) => {
-        transactions.value = newTransactions;
-        updateChart();
-      }
-    );
+      async (newTransactions) => {
+        transactions.value = await newTransactions // Await if the getter returns a promise
+        updateChart()
+      },
+    )
 
     // Filter transactions by date range and type
     const filteredTransactions = () => {
       return transactions.value.filter((transaction) => {
-        const date = new Date(transaction.date);
-        const isInDateRange = (!startDate.value || date >= new Date(startDate.value)) &&
-                              (!endDate.value || date <= new Date(endDate.value));
-        return isInDateRange;
-      });
-    };
+        const date = new Date(transaction.date)
+        const isInDateRange =
+          (!startDate.value || date >= new Date(startDate.value)) &&
+          (!endDate.value || date <= new Date(endDate.value))
+        return isInDateRange
+      })
+    }
 
     // Chart generation function
     const generateChart = () => {
-      const ctx = chartRef.value.getContext('2d');
+      const ctx = chartRef.value.getContext('2d')
 
-      // Destroy any existing chart
       if (chartInstance) {
-        chartInstance.destroy();
+        chartInstance.destroy()
       }
 
-      const data = filteredTransactions();
-      const dates = [...new Set(data.map((item) => item.date))]; // Unique dates for labels
+      const data = filteredTransactions()
+      const dates = [...new Set(data.map((item) => item.date))]
       const deposits = dates.map((date) =>
         data
           .filter((item) => item.date === date && item.type === 'deposit')
-          .reduce((acc, item) => acc + parseFloat(item.amount), 0)
-      );
+          .reduce((acc, item) => acc + parseFloat(item.amount), 0),
+      )
       const withdrawals = dates.map((date) =>
         data
           .filter((item) => item.date === date && item.type === 'withdrawal')
-          .reduce((acc, item) => acc + parseFloat(item.amount), 0)
-      );
+          .reduce((acc, item) => acc + parseFloat(item.amount), 0),
+      )
 
       chartInstance = new Chart(ctx, {
-        type: 'line', // Can be 'bar', 'pie', etc.
+        type: 'line',
         data: {
           labels: dates,
           datasets: [
@@ -108,6 +110,7 @@ export default {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
             x: {
               title: {
@@ -123,19 +126,23 @@ export default {
             },
           },
         },
-      });
-    };
+      })
+    }
 
     // Update chart whenever filters change
     const updateChart = () => {
-      generateChart(); // Re-generate chart with filtered data
-    };
+      generateChart()
+    }
 
-    return { chartRef, startDate, endDate };
+    return { chartRef, startDate, endDate }
   },
-};
+}
 </script>
 
 <style scoped>
-/* Optional: You can style the chart container here */
+/* Optional: Additional styles for the date picker and chart for alignment */
+.w-full {
+  max-width: 800px;
+  margin: auto;
+}
 </style>

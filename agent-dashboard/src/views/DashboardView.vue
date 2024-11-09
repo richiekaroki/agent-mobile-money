@@ -35,8 +35,9 @@
       <AgentProfile />
     </div>
 
-    <!-- Transaction Overview Section with Chart -->
-    <div class="p-4 bg-white rounded-lg shadow-md">
+    <!-- Transaction Overview Section with Chart and Date Filters -->
+    <div class="p-4 bg-white rounded-lg shadow-md mb-8">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Transaction Overview</h2>
       <TransactionChart />
     </div>
   </div>
@@ -63,10 +64,9 @@ export default {
 </script>
 
 <style scoped>
-/* Optional: You can style the grid layout here for better responsive design */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+/* Style the Transaction Overview section to match the rest of the dashboard layout */
+.transaction-overview {
+  max-width: 800px;
+  margin: 0 auto;
 }
 </style>

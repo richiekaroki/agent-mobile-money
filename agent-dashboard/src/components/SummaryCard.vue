@@ -22,5 +22,5 @@ export default {
       default: 'text-gray-500',
     },
   },
-};
+}
 </script>

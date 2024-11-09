@@ -29,7 +29,7 @@ export default {
     onMounted(async () => {
       try {
         await store.dispatch('fetchAgentProfile')
-      } catch (e) {
+      } catch (error) {
         error.value = 'Failed to load profile'
       } finally {
         loading.value = false

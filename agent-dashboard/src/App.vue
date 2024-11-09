@@ -11,7 +11,7 @@
       </nav>
     </header>
 
-    <NotificationComponent/>
+    <NotificationComponent />
 
     <main class="mt-6">
       <router-view />
@@ -20,13 +20,13 @@
 </template>
 
 <script>
-import NotificationComponent from './components/NotificationComponent.vue';
+import NotificationComponent from './components/NotificationComponent.vue'
 
 export default {
   name: 'App',
   components: {
-    NotificationComponent
-  }
+    NotificationComponent,
+  },
 }
 </script>
 
