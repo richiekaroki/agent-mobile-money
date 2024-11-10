@@ -15,11 +15,21 @@ export default createStore({
     setTransactions(state, transactions) {
       state.transactions = transactions
     },
+    addTransaction(state, transaction) {
+      state.transactions.push(transaction)
+    },
     setAgentProfile(state, profile) {
       state.agentProfile = profile
     },
     addNotification(state, message) {
-      state.notifications.push(message)
+      const newNotification = {
+        id: Date.now(),  // Using timestamp as a simple unique ID
+        message: message,
+      }
+      state.notifications.push(newNotification)
+    },
+    removeNotification(state, id) {
+      state.notifications = state.notifications.filter(notification => notification.id !== id)
     },
     clearNotifications(state) {
       state.notifications = []
@@ -27,8 +37,13 @@ export default createStore({
   },
   actions: {
     async fetchTransactions({ commit }) {
-      const transactions = await fetchMockTransactions()
-      commit('setTransactions', transactions)
+      try {
+        const transactions = await fetchMockTransactions()
+        commit('setTransactions', transactions)
+      } catch (error) {
+        console.error('Error fetching transactions:', error)
+        commit('addNotification', 'Failed to fetch transactions. Please try again later.')
+      }
     },
     fetchAgentProfile({ commit }) {
       const mockProfile = { name: 'Richard Karoki', balance: 1000 }
@@ -44,3 +59,4 @@ export default createStore({
     getAgentProfile: (state) => state.agentProfile,
   },
 })
+

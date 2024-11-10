@@ -1,19 +1,20 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen">
+  <div class="p-4 sm:p-6 bg-gray-100 min-h-screen">
     <!-- Main Heading Centered -->
-    <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">Transactions</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-blue-600">Transactions</h1>
 
     <!-- New Transaction Section -->
-    <div class="mb-8 p-6 bg-white rounded shadow-md">
-      <h3 class="text-2xl font-semibold text-center mb-4">Create New Transaction</h3>
+    <div class="mb-8 p-4 sm:p-6 bg-white rounded shadow-md">
+      <h3 class="text-xl sm:text-2xl font-semibold text-center mb-4">Create New Transaction</h3>
       <form @submit.prevent="submitTransaction" class="space-y-4">
-        <div class="flex justify-between">
+        <div class="space-y-4 sm:space-y-0 sm:flex sm:space-x-4">
           <!-- Date Picker -->
           <input
             v-model="newTransaction.date"
             type="date"
-            class="px-4 py-2 border rounded w-1/3"
+            class="px-4 py-2 border rounded w-full sm:w-1/3"
             required
+            aria-label="Transaction Date"
           />
 
           <!-- Amount Input -->
@@ -23,21 +24,27 @@
             step="0.01"
             min="0"
             placeholder="Amount (KES)"
-            class="px-4 py-2 border rounded w-1/3"
+            class="px-4 py-2 border rounded w-full sm:w-1/3"
             required
+            aria-label="Transaction Amount"
           />
 
           <!-- Transaction Type Dropdown -->
-          <select v-model="newTransaction.type" class="px-4 py-2 border rounded w-1/3" required>
+          <select v-model="newTransaction.type" class="px-4 py-2 border rounded w-full sm:w-1/3" required aria-label="Transaction Type">
             <option value="" disabled>Select Type</option>
             <option value="withdrawal">Withdrawal</option>
             <option value="deposit">Deposit</option>
           </select>
         </div>
 
+        <!-- Error Message for Amount -->
+        <div v-if="newTransaction.amount <= 0" class="text-red-600 text-sm">
+          Amount must be greater than 0.
+        </div>
+
         <!-- Submit Button -->
         <div class="flex justify-center mt-4">
-          <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" aria-label="Add Transaction">
             Add Transaction
           </button>
         </div>
@@ -45,35 +52,40 @@
     </div>
 
     <!-- Transaction History Section -->
-    <div class="bg-white rounded shadow-md p-6">
-      <h3 class="text-2xl font-semibold text-center mb-4">Transaction History</h3>
+    <div class="bg-white rounded shadow-md p-4 sm:p-6">
+      <h3 class="text-xl sm:text-2xl font-semibold text-center mb-4">Transaction History</h3>
 
       <!-- Filter Controls -->
-      <div class="mb-4 flex justify-between items-center">
+      <div class="mb-4 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0">
         <div class="flex space-x-4">
           <input
             v-model="startDate"
             type="date"
-            class="px-4 py-2 border rounded"
+            class="px-4 py-2 border rounded w-full sm:w-1/3"
             placeholder="Start Date"
+            aria-label="Start Date"
           />
           <input
             v-model="endDate"
             type="date"
-            class="px-4 py-2 border rounded"
+            class="px-4 py-2 border rounded w-full sm:w-1/3"
             placeholder="End Date"
+            aria-label="End Date"
           />
         </div>
 
-        <select v-model="typeFilter" class="px-4 py-2 border rounded">
+        <select v-model="typeFilter" class="px-4 py-2 border rounded w-full sm:w-1/3 mt-4 sm:mt-0" aria-label="Transaction Type Filter">
           <option value="">All Types</option>
           <option value="withdrawal">Withdrawal</option>
           <option value="deposit">Deposit</option>
         </select>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="text-center">Loading transactions...</div>
+      <!-- Loading State with Spinner -->
+      <div v-if="loading" class="text-center">
+        <div class="spinner"></div>
+        <p>Loading transactions...</p>
+      </div>
 
       <!-- No Transactions Found State -->
       <div v-else-if="filteredTransactions.length === 0" class="text-center">
@@ -87,6 +99,8 @@
           :key="transaction.id"
           class="mb-4 p-4 border-b cursor-pointer hover:bg-gray-50"
           @click="$emit('selectTransaction', transaction)"
+          role="listitem"
+          aria-label="Transaction"
         >
           <div class="flex justify-between">
             <span class="text-sm text-gray-600">{{ transaction.date }}</span>
@@ -102,6 +116,7 @@
           @click="previousPage"
           :disabled="currentPage === 1"
           class="px-4 py-2 bg-gray-500 text-white rounded disabled:opacity-50"
+          aria-label="Previous Page"
         >
           &#8592; Previous
         </button>
@@ -111,11 +126,9 @@
           <button
             v-for="page in totalPages"
             :key="page"
-            :class="[
-              'px-4 py-2 rounded',
-              currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200',
-            ]"
+            :class="[ 'px-4 py-2 rounded', currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200' ]"
             @click="goToPage(page)"
+            aria-label="Go to page {{ page }}"
           >
             {{ page }}
           </button>
@@ -125,6 +138,7 @@
           @click="nextPage"
           :disabled="currentPage === totalPages"
           class="px-4 py-2 bg-gray-500 text-white rounded disabled:opacity-50"
+          aria-label="Next Page"
         >
           Next &#8594;
         </button>
@@ -166,7 +180,15 @@ export default {
       type: '',
     })
 
-    // Fetch transactions
+    // Debounced fetch
+    const debounce = (fn, delay) => {
+      let timeout
+      return function (...args) {
+        clearTimeout(timeout)
+        timeout = setTimeout(() => fn(...args), delay)
+      }
+    }
+
     const fetchTransactions = async () => {
       try {
         const data = await fetchMockTransactions()
@@ -177,6 +199,8 @@ export default {
         loading.value = false
       }
     }
+
+    const debouncedFetch = debounce(fetchTransactions, 500)
 
     // Watch for page changes
     watch(
@@ -276,37 +300,25 @@ export default {
       typeFilter,
       newTransaction,
       submitTransaction,
+      debouncedFetch
     }
   },
 }
 </script>
 
 <style scoped>
-/* Styling to make the layout clean and aligned */
-h1 {
-  font-size: 2.5rem;
+/* Styling for mobile-first approach */
+.spinner {
+  border: 4px solid transparent;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  width: 30px;
+  height: 30px;
 }
 
-h3 {
-  font-size: 1.5rem;
-}
-
-input[type='date'],
-input[type='number'],
-select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

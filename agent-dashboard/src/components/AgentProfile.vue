@@ -2,13 +2,21 @@
 <template>
   <div class="p-4 bg-white rounded shadow">
     <h2 class="text-xl font-bold">Agent Profile</h2>
-    <div v-if="loading"></div>
-    <div v-else-if="error" class="text-red-500">{{ error }}</div>
+
+    <!-- Loading state -->
+    <div v-if="loading" class="text-center text-blue-500">Loading...</div>
+
+    <!-- Error state -->
+    <div v-if="error" class="text-red-500">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Profile data -->
     <div v-else>
-      <p>
+      <p class="text-lg">
         Name: <span class="font-medium">{{ profile.name }}</span>
       </p>
-      <p>
+      <p class="text-lg">
         Balance: <span class="font-medium">{{ profile.balance }} KES</span>
       </p>
     </div>
@@ -27,11 +35,12 @@ export default {
     const loading = ref(true)
     const error = ref(null)
 
+    // Fetch agent profile
     onMounted(async () => {
       try {
         await store.dispatch('fetchAgentProfile')
-      } catch (error) {
-        error.value = 'Failed to load profile'
+      } catch (err) {
+        error.value = err.response?.data?.message || 'Failed to load profile'
       } finally {
         loading.value = false
       }
@@ -41,3 +50,7 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* You can add custom styling here */
+</style>

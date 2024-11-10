@@ -31,36 +31,43 @@ export default {
     const chartRef = ref(null)
     let chartInstance = null
 
-    // Date range filters
-    const startDate = ref('')
-    const endDate = ref('')
+    // Date range filters (default to last 7 days)
+    const startDate = ref(getDefaultStartDate())
+    const endDate = ref(getDefaultEndDate())
 
     // Fetch transactions from Vuex store
     const transactions = ref([])
 
     // Fetch transactions from the store on mount
-    onMounted(async () => {
-      transactions.value = await store.getters.getTransactions // Make sure this resolves correctly
+    onMounted(() => {
+      transactions.value = store.getters.getTransactions // Fetch transactions
       generateChart() // Generate the chart after data is fetched
     })
 
     // Watch for changes in Vuex store data or filters
-    watch(
-      () => store.getters.getTransactions,
-      async (newTransactions) => {
-        transactions.value = await newTransactions // Await if the getter returns a promise
-        updateChart()
-      },
-    )
+    watch([startDate, endDate], () => {
+      updateChart() // Update chart whenever the date range changes
+    })
 
-    // Filter transactions by date range and type
+    // Function to get default start date (7 days ago)
+    function getDefaultStartDate() {
+      const date = new Date()
+      date.setDate(date.getDate() - 7) // Set to 7 days ago
+      return date.toISOString().split('T')[0] // Return in YYYY-MM-DD format
+    }
+
+    // Function to get today's date as the default end date
+    function getDefaultEndDate() {
+      return new Date().toISOString().split('T')[0] // Return today's date
+    }
+
+    // Filter transactions by date range
     const filteredTransactions = () => {
+      const start = new Date(startDate.value)
+      const end = new Date(endDate.value)
       return transactions.value.filter((transaction) => {
         const date = new Date(transaction.date)
-        const isInDateRange =
-          (!startDate.value || date >= new Date(startDate.value)) &&
-          (!endDate.value || date <= new Date(endDate.value))
-        return isInDateRange
+        return date >= start && date <= end
       })
     }
 
@@ -69,11 +76,11 @@ export default {
       const ctx = chartRef.value.getContext('2d')
 
       if (chartInstance) {
-        chartInstance.destroy()
+        chartInstance.destroy() // Destroy previous chart instance
       }
 
       const data = filteredTransactions()
-      const dates = [...new Set(data.map((item) => item.date))]
+      const dates = [...new Set(data.map((item) => item.date))] // Unique dates
       const deposits = dates.map((date) =>
         data
           .filter((item) => item.date === date && item.type === 'deposit')
@@ -131,7 +138,7 @@ export default {
 
     // Update chart whenever filters change
     const updateChart = () => {
-      generateChart()
+      generateChart() // Generate a new chart with the current date range
     }
 
     return { chartRef, startDate, endDate }
