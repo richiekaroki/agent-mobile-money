@@ -14,7 +14,9 @@ export default createStore({
       totalBalance: 0,
       todayTransactions: 0,
       pendingTransactions: 0,
-      commissionEarned: 0
+      commissionEarned: 0,
+      monthlyTarget: 5000,
+      dailyTarget: 50
     }
   },
   mutations: {
@@ -120,7 +122,9 @@ export default createStore({
         // Update dashboard stats
         commit('setDashboardStats', {
           totalBalance: mockProfile.balance,
-          commissionEarned: 2150
+          commissionEarned: 2150,
+          monthlyTarget: 5000,
+          dailyTarget: 50
         })
       } catch (error) {
         console.error('Error fetching agent profile:', error)

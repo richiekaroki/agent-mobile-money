@@ -1,134 +1,113 @@
 <template>
   <div class="space-y-8 animate-fade-in">
     <!-- Page Header -->
-    <div class="text-center">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Financial Dashboard</h1>
-      <p class="text-gray-600">Welcome back! Here's your account overview.</p>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Financial Dashboard</h1>
+        <p class="text-gray-600">Welcome back, {{ agentName }}! Here's your account overview.</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex space-x-3">
+        <button 
+          @click="refreshData"
+          :disabled="refreshing"
+          class="btn btn-secondary flex items-center"
+        >
+          <svg :class="['w-4 h-4 mr-2', refreshing ? 'animate-spin' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          {{ refreshing ? 'Refreshing...' : 'Refresh' }}
+        </button>
         <button 
           @click="showNewTransactionModal = true"
-          class="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
+          class="btn btn-primary flex items-center"
         >
-          <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
-          <span class="text-sm font-medium text-gray-700 group-hover:text-blue-700">New Transaction</span>
-        </button>
-        
-        <button class="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-green-500 hover:bg-green-50 transition-all duration-200 group">
-          <svg class="w-8 h-8 text-gray-400 group-hover:text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          <span class="text-sm font-medium text-gray-700 group-hover:text-green-700">Generate Report</span>
-        </button>
-        
-        <button class="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 group">
-          <svg class="w-8 h-8 text-gray-400 group-hover:text-purple-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-          </svg>
-          <span class="text-sm font-medium text-gray-700 group-hover:text-purple-700">Customer Support</span>
-        </button>
-        
-        <button class="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group">
-          <svg class="w-8 h-8 text-gray-400 group-hover:text-orange-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          </svg>
-          <span class="text-sm font-medium text-gray-700 group-hover:text-orange-700">Settings</span>
+          New Transaction
         </button>
       </div>
     </div>
+
+    <!-- Quick Actions -->
+    <QuickActions @action="handleQuickAction" />
 
     <!-- Financial Summary Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Skeleton cards for loading state -->
       <SkeletonCard v-if="loading" />
-      <SummaryCard
+      <StatCard
         v-else
         title="Total Balance"
-        :value="totalBalance"
+        :value="dashboardStats.totalBalance"
         subtitle="Available funds"
-        colorClass="text-green-600"
-        iconBgClass="bg-green-100"
-        iconColorClass="text-green-600"
+        valueColor="text-green-600"
+        iconBg="bg-green-100"
+        iconColor="text-green-600"
         :icon="WalletIcon"
-        :trend="{ direction: 'up', value: '12.5', period: 'vs last month' }"
-        aria-label="Total Balance Card"
+        :change="{ type: 'increase', value: 12.5 }"
+        tooltip="Your current available balance for transactions"
       />
 
       <SkeletonCard v-if="loading" />
-      <SummaryCard
+      <StatCard
         v-else
         title="Today's Transactions"
-        :value="todayTransactions"
+        :value="dashboardStats.todayTransactions"
         subtitle="Completed today"
-        colorClass="text-blue-600"
-        iconBgClass="bg-blue-100"
-        iconColorClass="text-blue-600"
+        valueColor="text-blue-600"
+        iconBg="bg-blue-100"
+        iconColor="text-blue-600"
         :icon="CreditCardIcon"
-        :trend="{ direction: 'up', value: '8.2', period: 'vs yesterday' }"
-        aria-label="Today's Transactions Card"
+        :change="{ type: 'increase', value: 8.2 }"
+        :progress="{ current: dashboardStats.todayTransactions, target: 50, label: 'Daily Goal' }"
+        progressColor="bg-blue-500"
       />
 
       <SkeletonCard v-if="loading" />
-      <SummaryCard
+      <StatCard
         v-else
         title="Pending Transactions"
-        :value="pendingTransactions"
+        :value="dashboardStats.pendingTransactions"
         subtitle="Awaiting processing"
-        colorClass="text-yellow-600"
-        iconBgClass="bg-yellow-100"
-        iconColorClass="text-yellow-600"
+        valueColor="text-yellow-600"
+        iconBg="bg-yellow-100"
+        iconColor="text-yellow-600"
         :icon="ClockIcon"
-        aria-label="Pending Transactions Card"
+        tooltip="Transactions waiting for approval or processing"
       />
 
       <SkeletonCard v-if="loading" />
-      <SummaryCard
+      <StatCard
         v-else
         title="Commission Earned"
-        :value="commissionEarned"
+        :value="dashboardStats.commissionEarned"
         subtitle="This month"
-        colorClass="text-purple-600"
-        iconBgClass="bg-purple-100"
-        iconColorClass="text-purple-600"
+        valueColor="text-purple-600"
+        iconBg="bg-purple-100"
+        iconColor="text-purple-600"
         :icon="TrendingUpIcon"
-        :trend="{ direction: 'up', value: '15.3', period: 'vs last month' }"
-        aria-label="Commission Earned Card"
+        :change="{ type: 'increase', value: 15.3 }"
+        :progress="{ current: dashboardStats.commissionEarned, target: 5000, label: 'Monthly Target' }"
+        progressColor="bg-purple-500"
       />
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
       <!-- Agent Profile Section -->
       <div class="lg:col-span-1">
-        <div class="card">
-          <AgentProfile />
-        </div>
+        <AgentProfile />
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="lg:col-span-1 xl:col-span-1">
+        <ActivityFeed />
       </div>
 
       <!-- Recent Transactions -->
-      <div class="lg:col-span-2">
-        <div class="card">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Recent Transactions</h2>
-            <router-link 
-              to="/transactions" 
-              class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
-            >
-              View all
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </router-link>
-          </div>
-          <RecentTransactions />
-        </div>
+      <div class="lg:col-span-2 xl:col-span-1">
+        <RecentTransactions />
       </div>
     </div>
 
@@ -165,11 +144,13 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import SummaryCard from '../components/SummaryCard.vue'
+import StatCard from '../components/StatCard.vue'
 import SkeletonCard from '../components/SkeletonCard.vue'
 import TransactionModal from '../components/TransactionModal.vue'
+import QuickActions from '../components/QuickActions.vue'
+import ActivityFeed from '../components/ActivityFeed.vue'
 
 // Icons (you can replace these with actual icon components)
 const WalletIcon = {
@@ -207,9 +188,11 @@ const TrendingUpIcon = {
 export default {
   name: 'DashboardView',
   components: {
-    SummaryCard,
+    StatCard,
     SkeletonCard,
     TransactionModal,
+    QuickActions,
+    ActivityFeed,
     AgentProfile: () => import('../components/AgentProfile.vue'),
     TransactionChart: () => import('../components/TransactionChart.vue'),
     RecentTransactions: () => import('../components/RecentTransactions.vue'),
@@ -217,14 +200,14 @@ export default {
   setup() {
     const store = useStore()
     const loading = ref(true)
+    const refreshing = ref(false)
     const showNewTransactionModal = ref(false)
     const selectedPeriod = ref('7d')
 
-    // Dashboard data
-    const totalBalance = ref('KES 0')
-    const todayTransactions = ref(0)
-    const pendingTransactions = ref(0)
-    const commissionEarned = ref('KES 0')
+    // Computed properties
+    const dashboardStats = computed(() => store.getters.getDashboardStats)
+    const agentProfile = computed(() => store.getters.getAgentProfile)
+    const agentName = computed(() => agentProfile.value.name || 'Agent')
 
     const chartPeriods = [
       { label: '7D', value: '7d' },
@@ -233,25 +216,67 @@ export default {
       { label: '1Y', value: '1y' }
     ]
 
-    // Simulate data fetching
-    onMounted(async () => {
+    const loadDashboardData = async () => {
       try {
         // Fetch data from store
         await store.dispatch('fetchTransactions')
         await store.dispatch('fetchAgentProfile')
-        
-        // Simulate loading delay
-        setTimeout(() => {
-          totalBalance.value = 'KES 45,250'
-          todayTransactions.value = 23
-          pendingTransactions.value = 3
-          commissionEarned.value = 'KES 2,150'
-          loading.value = false
-        }, 1500)
       } catch (error) {
         console.error('Error loading dashboard data:', error)
-        loading.value = false
+        store.dispatch('showNotification', {
+          type: 'error',
+          title: 'Error',
+          message: 'Failed to load dashboard data. Please try again.',
+          autoDismiss: true
+        })
+      } finally {
+        setTimeout(() => {
+          loading.value = false
+          refreshing.value = false
+        }, 800)
       }
+    }
+
+    const refreshData = async () => {
+      refreshing.value = true
+      await loadDashboardData()
+    }
+
+    const handleQuickAction = (actionId) => {
+      switch (actionId) {
+        case 'new-transaction':
+          showNewTransactionModal.value = true
+          break
+        case 'generate-report':
+          store.dispatch('showNotification', {
+            type: 'info',
+            title: 'Report Generation',
+            message: 'Report generation feature coming soon!',
+            autoDismiss: true
+          })
+          break
+        case 'customer-support':
+          store.dispatch('showNotification', {
+            type: 'info',
+            title: 'Customer Support',
+            message: 'Redirecting to customer support...',
+            autoDismiss: true
+          })
+          break
+        case 'settings':
+          store.dispatch('showNotification', {
+            type: 'info',
+            title: 'Settings',
+            message: 'Settings panel coming soon!',
+            autoDismiss: true
+          })
+          break
+      }
+    }
+
+    // Simulate data fetching
+    onMounted(async () => {
+      await loadDashboardData()
     })
 
     const handleTransactionSuccess = () => {
@@ -267,11 +292,12 @@ export default {
 
     return { 
       loading,
-      totalBalance, 
-      todayTransactions, 
-      pendingTransactions,
-      commissionEarned,
+      refreshing,
+      dashboardStats,
+      agentName,
       showNewTransactionModal,
+      refreshData,
+      handleQuickAction,
       selectedPeriod,
       chartPeriods,
       handleTransactionSuccess,

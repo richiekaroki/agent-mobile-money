@@ -1,5 +1,23 @@
 <template>
-  <div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        Recent Transactions
+      </h2>
+      <router-link 
+        to="/transactions" 
+        class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center transition-colors duration-200"
+      >
+        View all
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </router-link>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="space-y-3">
       <div v-for="i in 5" :key="i" class="animate-pulse">
