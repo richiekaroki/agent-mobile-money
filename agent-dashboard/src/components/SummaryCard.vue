@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="card card-hover group"
-    :aria-label="ariaLabel"
-    role="region"
-  >
+  <div class="card card-hover group" :aria-label="ariaLabel" role="region">
     <div class="flex items-center justify-between">
       <div class="flex-1">
         <p class="text-sm font-medium text-gray-600 mb-1">{{ title }}</p>
@@ -14,10 +10,15 @@
           {{ subtitle }}
         </div>
       </div>
-      
+
       <!-- Icon slot -->
       <div v-if="icon" class="ml-4">
-        <div :class="['w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200', iconBgClass]">
+        <div
+          :class="[
+            'w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200',
+            iconBgClass,
+          ]"
+        >
           <component :is="icon" :class="['w-6 h-6', iconColorClass]" />
         </div>
       </div>
@@ -30,7 +31,7 @@
         <span>{{ progressValue }}%</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-2">
-        <div 
+        <div
           :class="['h-2 rounded-full transition-all duration-500', progressColorClass]"
           :style="{ width: `${Math.min(progressValue, 100)}%` }"
         ></div>
@@ -39,28 +40,37 @@
 
     <!-- Trend indicator -->
     <div v-if="trend" class="flex items-center mt-3 text-xs">
-      <svg 
-        v-if="trend.direction === 'up'" 
-        class="w-3 h-3 mr-1 text-green-500" 
-        fill="currentColor" 
+      <svg
+        v-if="trend.direction === 'up'"
+        class="w-3 h-3 mr-1 text-green-500"
+        fill="currentColor"
         viewBox="0 0 20 20"
       >
-        <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        <path
+          fill-rule="evenodd"
+          d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
+          clip-rule="evenodd"
+        ></path>
       </svg>
-      <svg 
-        v-else-if="trend.direction === 'down'" 
-        class="w-3 h-3 mr-1 text-red-500" 
-        fill="currentColor" 
+      <svg
+        v-else-if="trend.direction === 'down'"
+        class="w-3 h-3 mr-1 text-red-500"
+        fill="currentColor"
         viewBox="0 0 20 20"
       >
-        <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        <path
+          fill-rule="evenodd"
+          d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        ></path>
       </svg>
       <span :class="trend.direction === 'up' ? 'text-green-600' : 'text-red-600'">
         {{ trend.value }}{{ trend.unit || '%' }} {{ trend.period || 'vs last month' }}
       </span>
     </div>
 
-    <slot></slot> <!-- Optional slot for additional custom content -->
+    <slot></slot>
+    <!-- Optional slot for additional custom content -->
   </div>
 </template>
 
@@ -98,9 +108,7 @@ export default {
     },
     ariaLabel: {
       type: String,
-      default: function() {
-        return this.title || 'Summary Card';
-      },
+      default: 'Summary Card',
     },
     showProgress: {
       type: Boolean,
@@ -123,11 +131,11 @@ export default {
   computed: {
     formattedValue() {
       if (typeof this.value === 'number') {
-        return this.value.toLocaleString();
+        return this.value.toLocaleString()
       } else if (this.value && this.value.includes('%')) {
-        return this.value;
+        return this.value
       }
-      return this.value;
+      return this.value
     },
   },
 }
