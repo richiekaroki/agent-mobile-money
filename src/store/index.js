@@ -1,7 +1,1 @@
-@@ .. @@
-     },
-     setAgentProfile(state, profile) {
-       state.agentProfile = profile
-+      // Store timestamp for token validation
-+      localStorage.setItem('mobicash_token_timestamp', Date.now().toString())
-     },
+{"code":"rate-limited","message":"You have hit the rate limit. Please upgrade to keep chatting.","providerLimitHit":false,"isRetryable":true}
