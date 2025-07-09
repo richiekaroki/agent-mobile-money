@@ -1,13 +1,57 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
-import LoginUser from '../views/LoginUser.vue'
+import AuthView from '../views/AuthView.vue'
 import TransactionsView from '../views/TransactionsView.vue'
 
+// Auth guard
+const requireAuth = (to, from, next) => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    next()
+  } else {
+    next('/auth')
+  }
+}
+
+const redirectIfAuth = (to, from, next) => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    next('/')
+  } else {
+    next()
+  }
+}
+
 const routes = [
-  { path: '/', name: 'Dashboard', component: DashboardView },
-  { path: '/transactions', name: 'Transactions', component: TransactionsView },
-  { path: '/login', name: 'Login', component: LoginUser },
+  { 
+    path: '/', 
+    name: 'Dashboard', 
+    component: DashboardView,
+    beforeEnter: requireAuth
+  },
+  { 
+    path: '/transactions', 
+    name: 'Transactions', 
+    component: TransactionsView,
+    beforeEnter: requireAuth
+  },
+  { 
+    path: '/auth', 
+    name: 'Auth', 
+    component: AuthView,
+    beforeEnter: redirectIfAuth
+  },
+  // Redirect old login route
+  { 
+    path: '/login', 
+    redirect: '/auth'
+  },
+  // Catch all route
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
+  }
 ]
 
 const router = createRouter({

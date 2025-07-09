@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Financial Dashboard</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Agent Dashboard</h1>
         <p class="text-gray-600">Welcome back, {{ agentName }}! Here's your account overview.</p>
       </div>
       <div class="mt-4 md:mt-0 flex space-x-3">

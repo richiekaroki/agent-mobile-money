@@ -1,6 +1,6 @@
 <!-- src/App.vue -->
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div v-if="!isAuthRoute" class="min-h-screen bg-gray-50">
     <!-- Navigation Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,7 +12,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
-            <h1 class="text-xl font-semibold text-gray-900">Mobile Money Agent</h1>
+            <h1 class="text-xl font-semibold text-gray-900">{{ appConfig.name }}</h1>
           </div>
 
           <!-- Navigation Links -->
@@ -42,7 +42,26 @@
             </router-link>
           </nav>
 
-          <!-- Mobile menu button -->
+          <!-- User Menu and Mobile menu button -->
+          <div class="flex items-center space-x-4">
+            <!-- User Menu -->
+            <div class="hidden md:flex items-center space-x-3">
+              <div class="text-right">
+                <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
+              </div>
+              <button 
+                @click="logout"
+                class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Logout"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Mobile menu button -->
           <button 
             @click="toggleMobileMenu"
             class="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -52,6 +71,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
           </button>
+          </div>
         </div>
 
         <!-- Mobile Navigation -->
@@ -80,6 +100,25 @@
               </svg>
               Transactions
             </router-link>
+            
+            <!-- Mobile User Info -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                  <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
+                </div>
+                <button 
+                  @click="logout"
+                  class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  title="Logout"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -93,10 +132,17 @@
       <router-view />
     </main>
   </div>
+  
+  <!-- Auth Route (Full Screen) -->
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import NotificationComponent from './components/NotificationComponent.vue'
 
 export default {
@@ -105,7 +151,19 @@ export default {
     NotificationComponent,
   },
   setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
     const showMobileMenu = ref(false)
+
+    // App configuration
+    const appConfig = ref({
+      name: 'MobiCash Agent'
+    })
+
+    // Computed properties
+    const isAuthRoute = computed(() => route.path === '/auth')
+    const currentUser = computed(() => store.getters.getAgentProfile)
 
     const toggleMobileMenu = () => {
       showMobileMenu.value = !showMobileMenu.value
@@ -115,10 +173,43 @@ export default {
       showMobileMenu.value = false
     }
 
+    const logout = () => {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear auth data
+        localStorage.removeItem('authToken')
+        localStorage.removeItem('userData')
+        
+        // Clear store
+        store.commit('setAgentProfile', {
+          name: '',
+          balance: 0,
+          agentId: '',
+          phone: '',
+          location: '',
+          joinDate: '',
+          status: ''
+        })
+        
+        // Redirect to auth
+        router.push('/auth')
+        
+        // Show notification
+        store.dispatch('showNotification', {
+          type: 'info',
+          title: 'Logged Out',
+          message: 'You have been successfully logged out.',
+          autoDismiss: true
+        })
+      }
+    }
     return {
+      appConfig,
+      isAuthRoute,
+      currentUser,
       showMobileMenu,
       toggleMobileMenu,
-      closeMobileMenu
+      closeMobileMenu,
+      logout
     }
   }
 }
