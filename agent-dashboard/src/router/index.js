@@ -17,6 +17,7 @@ const requireAuth = (to, from, next) => {
 const redirectIfAuth = (to, from, next) => {
   const token = localStorage.getItem('authToken')
   if (token) {
+  }
   if (token) {
     next('/')
   } else {
