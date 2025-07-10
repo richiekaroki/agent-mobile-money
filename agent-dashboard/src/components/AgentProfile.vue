@@ -26,6 +26,7 @@
 <script>
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
+import authService from '../services/authService'
 
 export default {
   name: 'AgentProfile',
@@ -45,7 +46,8 @@ export default {
         loading.value = false
       }
     })
-
+      updateProfile,
+      authService
     return { profile, loading, error }
   },
 }

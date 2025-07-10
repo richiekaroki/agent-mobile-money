@@ -143,7 +143,6 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import NotificationComponent from './components/NotificationComponent.vue'
 
 export default {
   name: 'App',
@@ -178,6 +177,7 @@ export default {
         // Clear auth data
         localStorage.removeItem('authToken')
         localStorage.removeItem('userData')
+        localStorage.removeItem('userData')
         
         // Clear store
         store.commit('setAgentProfile', {
@@ -210,7 +210,6 @@ export default {
       toggleMobileMenu,
       closeMobileMenu,
       logout
-    }
   }
 }
 </script>

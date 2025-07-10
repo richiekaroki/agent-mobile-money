@@ -1,4 +1,4 @@
-// Authentication service with proper security measures
+// Authentication service with proper user management
 import { ref } from 'vue'
 
 class AuthService {
@@ -7,6 +7,43 @@ class AuthService {
     this.tokenKey = 'mobicash_auth_token'
     this.userKey = 'mobicash_user_data'
     this.refreshTokenKey = 'mobicash_refresh_token'
+    this.usersKey = 'mobicash_registered_users' // Store for registered users
+  }
+
+  // Get all registered users from localStorage
+  getRegisteredUsers() {
+    try {
+      const users = localStorage.getItem(this.usersKey)
+      return users ? JSON.parse(users) : []
+    } catch (error) {
+      return []
+    }
+  }
+
+  // Save user to registered users list
+  saveUser(userData) {
+    try {
+      const users = this.getRegisteredUsers()
+      const existingUserIndex = users.findIndex(u => u.email === userData.email)
+      
+      if (existingUserIndex >= 0) {
+        users[existingUserIndex] = userData
+      } else {
+        users.push(userData)
+      }
+      
+      localStorage.setItem(this.usersKey, JSON.stringify(users))
+      return true
+    } catch (error) {
+      console.error('Error saving user:', error)
+      return false
+    }
+  }
+
+  // Find user by email
+  findUserByEmail(email) {
+    const users = this.getRegisteredUsers()
+    return users.find(u => u.email.toLowerCase() === email.toLowerCase())
   }
 
   // Generate secure token (in production, this comes from your backend)
@@ -42,14 +79,14 @@ class AuthService {
 
   // Password strength validation
   validatePassword(password) {
-    const minLength = 8
+    const minLength = 6 // Reduced for easier testing
     const hasUpperCase = /[A-Z]/.test(password)
     const hasLowerCase = /[a-z]/.test(password)
     const hasNumbers = /\d/.test(password)
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
 
     return {
-      isValid: password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers,
+      isValid: password.length >= minLength,
       strength: this.calculatePasswordStrength(password),
       requirements: {
         minLength: password.length >= minLength,
@@ -63,8 +100,8 @@ class AuthService {
 
   calculatePasswordStrength(password) {
     let score = 0
+    if (password.length >= 6) score += 1
     if (password.length >= 8) score += 1
-    if (password.length >= 12) score += 1
     if (/[A-Z]/.test(password)) score += 1
     if (/[a-z]/.test(password)) score += 1
     if (/\d/.test(password)) score += 1
@@ -75,7 +112,7 @@ class AuthService {
     return { level: 'strong', color: 'green', percentage: 100 }
   }
 
-  // Simulate API calls (replace with real API endpoints)
+  // Sign in with registered users
   async signIn(credentials) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -93,51 +130,58 @@ class AuthService {
           throw new Error('Password must be at least 6 characters long')
         }
 
-        // Demo credentials
-        const demoUsers = [
-          {
+        // Check demo user first
+        if (email === 'demo@agent.com' && password === 'demo123') {
+          const demoUser = {
+            id: 'AG001',
+            name: 'Richard Karoki',
             email: 'demo@agent.com',
-            password: 'demo123',
-            userData: {
-              id: 'AG001',
-              name: 'Richard Karoki',
-              email: 'demo@agent.com',
-              phone: '+254 700 123 456',
-              agentId: 'AG001',
-              location: 'Nairobi, Kenya',
-              joinDate: '2023-01-15',
-              status: 'active',
-              balance: 45250,
-              role: 'agent',
-              verified: true,
-              lastLogin: new Date().toISOString()
-            }
-          },
-          {
-            email: 'admin@mobicash.com',
-            password: 'admin123',
-            userData: {
-              id: 'ADM001',
-              name: 'System Administrator',
-              email: 'admin@mobicash.com',
-              phone: '+254 700 000 000',
-              agentId: 'ADM001',
-              location: 'Nairobi, Kenya',
-              joinDate: '2023-01-01',
-              status: 'active',
-              balance: 100000,
-              role: 'admin',
-              verified: true,
-              lastLogin: new Date().toISOString()
-            }
+            phone: '+254 700 123 456',
+            agentId: 'AG001',
+            location: 'Nairobi, Kenya',
+            joinDate: '2023-01-15',
+            status: 'active',
+            balance: 45250,
+            role: 'agent',
+            verified: true,
+            lastLogin: new Date().toISOString()
           }
-        ]
 
-        const user = demoUsers.find(u => u.email === email && u.password === password)
+          const accessToken = this.generateSecureToken(64)
+          const refreshToken = this.generateSecureToken(32)
 
-        if (!user) {
-          throw new Error('Invalid email or password. Please check your credentials and try again.')
+          localStorage.setItem(this.tokenKey, accessToken)
+          localStorage.setItem(this.userKey, JSON.stringify(demoUser))
+          
+          if (rememberMe) {
+            localStorage.setItem(this.refreshTokenKey, refreshToken)
+          }
+
+          resolve({
+            success: true,
+            user: demoUser,
+            accessToken,
+            refreshToken: rememberMe ? refreshToken : null,
+            message: 'Sign in successful'
+          })
+          return
         }
+
+        // Check registered users
+        const user = this.findUserByEmail(email)
+        if (!user) {
+          throw new Error('No account found with this email address. Please sign up first.')
+        }
+
+        // Verify password (in production, compare hashed passwords)
+        const hashedPassword = await this.hashPassword(password)
+        if (user.passwordHash !== hashedPassword) {
+          throw new Error('Invalid password. Please check your credentials and try again.')
+        }
+
+        // Update last login
+        user.lastLogin = new Date().toISOString()
+        this.saveUser(user)
 
         // Generate tokens
         const accessToken = this.generateSecureToken(64)
@@ -145,7 +189,7 @@ class AuthService {
 
         // Store tokens
         localStorage.setItem(this.tokenKey, accessToken)
-        localStorage.setItem(this.userKey, JSON.stringify(user.userData))
+        localStorage.setItem(this.userKey, JSON.stringify(user))
         
         if (rememberMe) {
           localStorage.setItem(this.refreshTokenKey, refreshToken)
@@ -153,7 +197,7 @@ class AuthService {
 
         resolve({
           success: true,
-          user: user.userData,
+          user: user,
           accessToken,
           refreshToken: rememberMe ? refreshToken : null,
           message: 'Sign in successful'
@@ -195,18 +239,21 @@ class AuthService {
 
         const passwordValidation = this.validatePassword(password)
         if (!passwordValidation.isValid) {
-          throw new Error('Password must be at least 8 characters with uppercase, lowercase, and numbers')
+          throw new Error('Password must be at least 6 characters long')
         }
 
         if (password !== confirmPassword) {
           throw new Error('Passwords do not match')
         }
 
-        // Check if email already exists (simulate)
-        const existingEmails = ['existing@test.com', 'taken@example.com']
-        if (existingEmails.includes(email.toLowerCase())) {
-          throw new Error('An account with this email already exists')
+        // Check if email already exists
+        const existingUser = this.findUserByEmail(email)
+        if (existingUser) {
+          throw new Error('An account with this email already exists. Please sign in instead.')
         }
+
+        // Hash password
+        const passwordHash = await this.hashPassword(password)
 
         // Create new user
         const newUser = {
@@ -219,12 +266,18 @@ class AuthService {
           agentId: `AG${Date.now().toString().slice(-6)}`,
           location: 'Kenya',
           joinDate: new Date().toISOString().split('T')[0],
-          status: 'pending_verification',
-          balance: 5000, // Starting bonus
+          status: 'active',
+          balance: 10000, // Starting bonus
           role: 'agent',
-          verified: false,
+          verified: true, // Auto-verify for demo
           createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
+          lastLogin: new Date().toISOString(),
+          passwordHash // Store hashed password
+        }
+
+        // Save user to registered users
+        if (!this.saveUser(newUser)) {
+          throw new Error('Failed to create account. Please try again.')
         }
 
         // Generate tokens
@@ -241,7 +294,7 @@ class AuthService {
           user: newUser,
           accessToken,
           refreshToken,
-          message: 'Account created successfully! Please verify your email.'
+          message: 'Account created successfully!'
         })
 
       } catch (error) {
@@ -314,6 +367,11 @@ class AuthService {
           throw new Error('Please enter a valid email address')
         }
 
+        const user = this.findUserByEmail(email)
+        if (!user) {
+          throw new Error('No account found with this email address')
+        }
+
         resolve({
           success: true,
           message: 'Password reset instructions have been sent to your email'
@@ -338,6 +396,7 @@ class AuthService {
           user.verified = true
           user.status = 'active'
           localStorage.setItem(this.userKey, JSON.stringify(user))
+          this.saveUser(user)
         }
 
         resolve({
@@ -348,6 +407,39 @@ class AuthService {
         reject({
           success: false,
           message: 'Email verification failed'
+        })
+      }
+    })
+  }
+
+  // Update user profile
+  async updateProfile(updates) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const currentUser = this.getCurrentUser()
+        if (!currentUser) {
+          throw new Error('No user logged in')
+        }
+
+        const updatedUser = { ...currentUser, ...updates }
+        
+        // Save to current session
+        localStorage.setItem(this.userKey, JSON.stringify(updatedUser))
+        
+        // Save to registered users
+        this.saveUser(updatedUser)
+
+        resolve({
+          success: true,
+          user: updatedUser,
+          message: 'Profile updated successfully'
+        })
+      } catch (error) {
+        reject({
+          success: false,
+          message: error.message || 'Profile update failed'
         })
       }
     })

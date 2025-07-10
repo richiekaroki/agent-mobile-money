@@ -3,9 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 import AuthView from '../views/AuthView.vue'
 import TransactionsView from '../views/TransactionsView.vue'
-
 // Auth guard
 const requireAuth = (to, from, next) => {
+  const token = localStorage.getItem('authToken')
   const token = localStorage.getItem('authToken')
   if (token) {
     next()
@@ -16,6 +16,7 @@ const requireAuth = (to, from, next) => {
 
 const redirectIfAuth = (to, from, next) => {
   const token = localStorage.getItem('authToken')
+  if (token) {
   if (token) {
     next('/')
   } else {
