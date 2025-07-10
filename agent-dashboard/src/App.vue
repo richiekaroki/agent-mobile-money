@@ -47,7 +47,7 @@
             <!-- User Menu -->
             <div class="hidden md:flex items-center space-x-3">
               <div class="text-right">
-                <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                <p class="text-sm font-medium text-gray-900">{{ currentUser.name || 'Agent User' }}</p>
                 <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
               </div>
               <button 
@@ -105,7 +105,7 @@
             <div class="border-t border-gray-200 pt-4 mt-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                  <p class="text-sm font-medium text-gray-900">{{ currentUser.name || 'Agent User' }}</p>
                   <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
                 </div>
                 <button 

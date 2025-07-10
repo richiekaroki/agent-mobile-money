@@ -146,6 +146,7 @@
                 v-model="signUpForm.firstName"
                 type="text"
                 required
+                minlength="2"
                 class="input-field"
                 placeholder="First name"
                 :disabled="loading"
@@ -160,6 +161,7 @@
                 v-model="signUpForm.lastName"
                 type="text"
                 required
+                minlength="2"
                 class="input-field"
                 placeholder="Last name"
                 :disabled="loading"
