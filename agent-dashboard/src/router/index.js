@@ -1,64 +1,142 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import DashboardView from '../views/DashboardView.vue'
 import AuthView from '../views/AuthView.vue'
+import DashboardView from '../views/DashboardView.vue'
 import TransactionsView from '../views/TransactionsView.vue'
-// Auth guard
+
+const isAuthenticated = () => {
+  try {
+    const token = localStorage.getItem('mobicash_auth_token')
+    const userData = localStorage.getItem('mobicash_user_data')
+
+    if (!token || !userData) {
+      return false
+    }
+
+    const user = JSON.parse(userData)
+    if (user.expiresAt && Date.now() > user.expiresAt) {
+      localStorage.removeItem('mobicash_auth_token')
+      localStorage.removeItem('mobicash_user_data')
+      localStorage.removeItem('mobicash_refresh_token')
+      return false
+    }
+
+    return true
+  } catch (_error) {
+    // Prefix with underscore to indicate intentionally unused
+    return false
+  }
+}
+
 const requireAuth = (to, from, next) => {
-  const token = localStorage.getItem('authToken')
-  const token = localStorage.getItem('authToken')
-  if (token) {
+  if (isAuthenticated()) {
     next()
   } else {
-    next('/auth')
+    localStorage.removeItem('mobicash_auth_token')
+    localStorage.removeItem('mobicash_user_data')
+    localStorage.removeItem('mobicash_refresh_token')
+
+    next({
+      path: '/auth',
+      query: { redirect: to.fullPath },
+    })
   }
 }
 
 const redirectIfAuth = (to, from, next) => {
-  const token = localStorage.getItem('authToken')
-  if (token) {
-  }
-  if (token) {
-    next('/')
+  if (isAuthenticated()) {
+    const redirectPath = to.query.redirect || '/'
+    next(redirectPath)
   } else {
     next()
   }
 }
 
 const routes = [
-  { 
-    path: '/', 
-    name: 'Dashboard', 
+  {
+    path: '/',
+    name: 'Dashboard',
     component: DashboardView,
-    beforeEnter: requireAuth
+    beforeEnter: requireAuth,
+    meta: {
+      requiresAuth: true,
+      title: 'Dashboard',
+    },
   },
-  { 
-    path: '/transactions', 
-    name: 'Transactions', 
+  {
+    path: '/transactions',
+    name: 'Transactions',
     component: TransactionsView,
-    beforeEnter: requireAuth
+    beforeEnter: requireAuth,
+    meta: {
+      requiresAuth: true,
+      title: 'Transactions',
+    },
   },
-  { 
-    path: '/auth', 
-    name: 'Auth', 
+  {
+    path: '/auth',
+    name: 'Auth',
     component: AuthView,
-    beforeEnter: redirectIfAuth
+    beforeEnter: redirectIfAuth,
+    meta: {
+      requiresAuth: false,
+      title: 'Sign In',
+    },
   },
-  // Redirect old login route
-  { 
-    path: '/login', 
-    redirect: '/auth'
+  {
+    path: '/login',
+    redirect: '/auth',
   },
-  // Catch all route
+  {
+    path: '/signup',
+    redirect: '/auth',
+  },
+  {
+    path: '/logout',
+    name: 'Logout',
+    beforeEnter: (to, from, next) => {
+      localStorage.removeItem('mobicash_auth_token')
+      localStorage.removeItem('mobicash_user_data')
+      localStorage.removeItem('mobicash_refresh_token')
+      next('/auth')
+    },
+  },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
-  }
+    name: 'NotFound',
+    beforeEnter: (to, from, next) => {
+      if (isAuthenticated()) {
+        next('/')
+      } else {
+        next('/auth')
+      }
+    },
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - MobiCash Agent`
+  }
+
+  if (to.meta.requiresAuth && !isAuthenticated()) {
+    next({
+      path: '/auth',
+      query: { redirect: to.fullPath },
+    })
+    return
+  }
+
+  next()
+})
+
+router.afterEach(() => {
+  // Navigation analytics could be added here if needed
 })
 
 export default router
