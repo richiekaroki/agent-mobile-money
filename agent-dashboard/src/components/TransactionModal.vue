@@ -1,23 +1,26 @@
 <template>
   <!-- Modal Overlay -->
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" @click="closeModal">
-    <div 
-      class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-fade-in"
-      @click.stop
-    >
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-gray-900">New Transaction</h2>
-        <button 
-          @click="closeModal"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-          aria-label="Close modal"
-        >
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    @click="closeModal"
+  >
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">New Transaction</h2>
+      <button
+        @click="closeModal"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+        aria-label="Close modal"
+      >
+        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
 
       <!-- Modal Content -->
       <div class="p-6">
@@ -31,7 +34,11 @@
         <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <div class="flex items-center">
             <svg class="w-5 h-5 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              ></path>
             </svg>
             <span class="text-red-800 text-sm">{{ error }}</span>
           </div>
@@ -41,9 +48,7 @@
         <form v-else @submit.prevent="submitTransaction" class="space-y-6">
           <!-- Transaction Type -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Transaction Type
-            </label>
+            <label class="block text-sm font-medium text-gray-700 mb-2"> Transaction Type </label>
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -52,15 +57,25 @@
                   'p-4 border-2 rounded-lg text-center transition-all duration-200',
                   newTransaction.type === 'deposit'
                     ? 'border-green-500 bg-green-50 text-green-700'
-                    : 'border-gray-300 hover:border-gray-400'
+                    : 'border-gray-300 hover:border-gray-400',
                 ]"
               >
-                <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                <svg
+                  class="w-6 h-6 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
                 </svg>
                 <span class="text-sm font-medium">Deposit</span>
               </button>
-              
+
               <button
                 type="button"
                 @click="newTransaction.type = 'withdrawal'"
@@ -68,11 +83,21 @@
                   'p-4 border-2 rounded-lg text-center transition-all duration-200',
                   newTransaction.type === 'withdrawal'
                     ? 'border-red-500 bg-red-50 text-red-700'
-                    : 'border-gray-300 hover:border-gray-400'
+                    : 'border-gray-300 hover:border-gray-400',
                 ]"
               >
-                <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                <svg
+                  class="w-6 h-6 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M20 12H4"
+                  ></path>
                 </svg>
                 <span class="text-sm font-medium">Withdrawal</span>
               </button>
@@ -151,11 +176,7 @@
 
           <!-- Form Actions -->
           <div class="flex space-x-3 pt-4">
-            <button
-              type="button"
-              @click="closeModal"
-              class="flex-1 btn btn-secondary"
-            >
+            <button type="button" @click="closeModal" class="flex-1 btn btn-secondary">
               Cancel
             </button>
             <button
@@ -177,7 +198,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -192,7 +213,7 @@ export default {
       amount: '',
       customerPhone: '',
       date: new Date().toISOString().split('T')[0],
-      notes: ''
+      notes: '',
     })
 
     // Component state
@@ -203,7 +224,7 @@ export default {
 
     // Computed properties
     const today = computed(() => new Date().toISOString().split('T')[0])
-    
+
     const isValid = computed(() => {
       return (
         newTransaction.value.type &&
@@ -246,21 +267,26 @@ export default {
           date: newTransaction.value.date,
           notes: newTransaction.value.notes,
           status: 'completed',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         }
 
         // Add to store
-        store.dispatch('addTransaction', transactionData)
-        
+        await store.dispatch('addTransaction', transactionData)
+
         // Emit success event
         emit('success', transactionData)
-        
+
         // Reset form
         resetForm()
-        
       } catch (err) {
-        console.error('Error submitting transaction:', err)
         error.value = 'Transaction submission failed. Please try again.'
+        store.dispatch('logError', {
+          message: 'Transaction submission error',
+          error: err,
+          context: {
+            transactionData: newTransaction.value,
+          },
+        })
       } finally {
         submitting.value = false
       }
@@ -272,7 +298,7 @@ export default {
         amount: '',
         customerPhone: '',
         date: new Date().toISOString().split('T')[0],
-        notes: ''
+        notes: '',
       }
       amountError.value = false
       error.value = null
@@ -296,7 +322,7 @@ export default {
       isValid,
       closeModal,
       submitTransaction,
-      validateAmount
+      validateAmount,
     }
   },
 }
