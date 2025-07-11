@@ -2,6 +2,7 @@
      const currentUser = computed(() => store.getters.getAgentProfile)
 
      const toggleMobileMenu = () => {
+     }
 @@ .. @@
          // Clear auth data
          localStorage.removeItem('authToken')
@@ -13,3 +14,5 @@
          
          // Clear store
          store.commit('setAgentProfile', {
+         }
+         )
