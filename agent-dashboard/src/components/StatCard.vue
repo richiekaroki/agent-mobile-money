@@ -13,7 +13,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="flex items-baseline space-x-2">
           <p :class="['text-2xl font-bold', valueColor]">{{ formattedValue }}</p>
           <div v-if="change" class="flex items-center text-xs">
@@ -28,15 +28,15 @@
             </span>
           </div>
         </div>
-        
+
         <p v-if="subtitle" class="text-xs text-gray-500 mt-1">{{ subtitle }}</p>
       </div>
-      
+
       <div :class="['w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200', iconBg]">
         <component :is="icon" :class="['w-6 h-6', iconColor]" />
       </div>
     </div>
-    
+
     <!-- Progress bar for goals/targets -->
     <div v-if="progress" class="mt-4">
       <div class="flex justify-between text-xs text-gray-600 mb-1">
@@ -44,7 +44,7 @@
         <span>{{ progress.current }}/{{ progress.target }}</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-2">
-        <div 
+        <div
           :class="['h-2 rounded-full transition-all duration-500', progressColor]"
           :style="{ width: `${Math.min((progress.current / progress.target) * 100, 100)}%` }"
         ></div>
