@@ -175,6 +175,30 @@
                   {{ passwordStrength.level }}
                 </span>
               </div>
+              
+              <!-- Password Requirements -->
+              <div v-if="formData.password" class="mt-2 text-xs space-y-1">
+                <div class="grid grid-cols-2 gap-1">
+                  <div :class="passwordStrength.requirements?.minLength ? 'text-green-600' : 'text-red-600'">
+                    ✓ 8+ characters
+                  </div>
+                  <div :class="passwordStrength.requirements?.hasUpperCase ? 'text-green-600' : 'text-red-600'">
+                    ✓ Uppercase letter
+                  </div>
+                  <div :class="passwordStrength.requirements?.hasLowerCase ? 'text-green-600' : 'text-red-600'">
+                    ✓ Lowercase letter
+                  </div>
+                  <div :class="passwordStrength.requirements?.hasNumbers ? 'text-green-600' : 'text-red-600'">
+                    ✓ Number
+                  </div>
+                  <div :class="passwordStrength.requirements?.hasSpecialChar ? 'text-green-600' : 'text-red-600'">
+                    ✓ Special character
+                  </div>
+                  <div :class="passwordStrength.requirements?.hasNoSpaces ? 'text-green-600' : 'text-red-600'">
+                    ✓ No spaces
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -311,7 +335,8 @@ export default {
     // Computed properties
     const passwordStrength = computed(() => {
       if (!formData.value.password) return { level: 'weak', color: 'red', percentage: 0 }
-      return authService.validatePassword(formData.value.password).strength
+      const validation = authService.validatePassword(formData.value.password)
+      return { ...validation.strength, requirements: validation.requirements }
     })
 
     const isFormValid = computed(() => {
@@ -354,7 +379,7 @@ export default {
         // Password validation
         const passwordValidation = authService.validatePassword(formData.value.password)
         if (!passwordValidation.isValid) {
-          errors.value.password = 'Password must be at least 6 characters long'
+          errors.value.password = 'Password must be at least 8 characters with uppercase, lowercase, number, and special character'
         }
 
         // Confirm password validation
