@@ -351,7 +351,7 @@ class AuthService {
   createDemoUser() {
     return {
       id: 'AG001',
-      name: 'Richard Karoki',
+      name: 'John Doe',
       email: 'demo@agent.com',
       phone: '+254700123456',
       agentId: 'AG001',
