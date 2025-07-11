@@ -1,7 +1,7 @@
 <template>
   <!-- Modal Overlay -->
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" @click="closeModal">
-    <div 
+    <div
       class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in"
       @click.stop
     >
@@ -13,18 +13,18 @@
             transaction.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
           ]">
             <svg class="w-5 h-5" :class="transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path 
-                v-if="transaction.type === 'deposit'" 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="2" 
+              <path
+                v-if="transaction.type === 'deposit'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"
               ></path>
-              <path 
-                v-else 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="2" 
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
                 d="M20 12H4"
               ></path>
             </svg>
@@ -34,7 +34,7 @@
             <p class="text-sm text-gray-500">Transaction ID: {{ transaction.id }}</p>
           </div>
         </div>
-        <button 
+        <button
           @click="closeModal"
           class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
           aria-label="Close modal"
@@ -62,7 +62,7 @@
               {{ transaction.status || 'completed' }}
             </span>
           </div>
-          
+
           <!-- Status Timeline -->
           <div class="relative">
             <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
@@ -78,7 +78,7 @@
                   <p class="text-xs text-gray-500">{{ formatDateTime(transaction.createdAt || transaction.date) }}</p>
                 </div>
               </div>
-              
+
               <div class="relative flex items-center">
                 <div :class="[
                   'w-8 h-8 rounded-full flex items-center justify-center',
@@ -191,7 +191,7 @@
             </svg>
             Print Receipt
           </button>
-          
+
           <button
             v-if="(transaction.status || 'completed') === 'pending'"
             @click="cancelTransaction"
@@ -202,7 +202,7 @@
             </svg>
             Cancel Transaction
           </button>
-          
+
           <button
             @click="closeModal"
             class="flex-1 btn btn-primary"
@@ -250,27 +250,27 @@ export default {
 
     const getStatusClass = (status) => {
       switch (status) {
-        case 'completed':
-          return 'bg-green-100 text-green-800'
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-800'
-        case 'failed':
-          return 'bg-red-100 text-red-800'
-        default:
-          return 'bg-gray-100 text-gray-800'
+      case 'completed':
+        return 'bg-green-100 text-green-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'failed':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
       }
     }
 
     const getStatusDotClass = (status) => {
       switch (status) {
-        case 'completed':
-          return 'bg-green-500'
-        case 'pending':
-          return 'bg-yellow-500'
-        case 'failed':
-          return 'bg-red-500'
-        default:
-          return 'bg-gray-500'
+      case 'completed':
+        return 'bg-green-500'
+      case 'pending':
+        return 'bg-yellow-500'
+      case 'failed':
+        return 'bg-red-500'
+      default:
+        return 'bg-gray-500'
       }
     }
 
