@@ -3,6 +3,11 @@
     <!-- Main Heading Centered -->
     <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-blue-600">Transactions</h1>
 
+    <!-- Error Display -->
+    <div v-if="error" class="mb-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+      {{ error }}
+    </div>
+
     <!-- New Transaction Section -->
     <div class="mb-8 p-4 sm:p-6 bg-white rounded shadow-md">
       <h3 class="text-xl sm:text-2xl font-semibold text-center mb-4">Create New Transaction</h3>
@@ -30,21 +35,30 @@
           />
 
           <!-- Transaction Type Dropdown -->
-          <select v-model="newTransaction.type" class="px-4 py-2 border rounded w-full sm:w-1/3" required aria-label="Transaction Type">
+          <select
+            v-model="newTransaction.type"
+            class="px-4 py-2 border rounded w-full sm:w-1/3"
+            required
+            aria-label="Transaction Type"
+          >
             <option value="" disabled>Select Type</option>
             <option value="withdrawal">Withdrawal</option>
             <option value="deposit">Deposit</option>
           </select>
         </div>
 
-        <!-- Error Message for Amount -->
+        <!-- Validation Message -->
         <div v-if="newTransaction.amount <= 0" class="text-red-600 text-sm">
           Amount must be greater than 0.
         </div>
 
         <!-- Submit Button -->
         <div class="flex justify-center mt-4">
-          <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" aria-label="Add Transaction">
+          <button
+            type="submit"
+            class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            aria-label="Add Transaction"
+          >
             Add Transaction
           </button>
         </div>
@@ -56,7 +70,9 @@
       <h3 class="text-xl sm:text-2xl font-semibold text-center mb-4">Transaction History</h3>
 
       <!-- Filter Controls -->
-      <div class="mb-4 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0">
+      <div
+        class="mb-4 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0"
+      >
         <div class="flex space-x-4">
           <input
             v-model="startDate"
@@ -74,7 +90,11 @@
           />
         </div>
 
-        <select v-model="typeFilter" class="px-4 py-2 border rounded w-full sm:w-1/3 mt-4 sm:mt-0" aria-label="Transaction Type Filter">
+        <select
+          v-model="typeFilter"
+          class="px-4 py-2 border rounded w-full sm:w-1/3 mt-4 sm:mt-0"
+          aria-label="Transaction Type Filter"
+        >
           <option value="">All Types</option>
           <option value="withdrawal">Withdrawal</option>
           <option value="deposit">Deposit</option>
@@ -103,9 +123,17 @@
           aria-label="Transaction"
         >
           <div class="flex justify-between">
-            <span class="text-sm text-gray-600">{{ transaction.date }}</span>
-            <span class="text-sm text-gray-600">{{ transaction.type }}</span>
-            <span class="text-sm text-gray-600">{{ transaction.amount }} KES</span>
+            <span class="text-sm text-gray-600">{{ formatDate(transaction.date) }}</span>
+            <span class="text-sm text-gray-600 capitalize">{{ transaction.type }}</span>
+            <span
+              :class="[
+                'text-sm font-semibold',
+                transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600',
+              ]"
+            >
+              {{ transaction.type === 'deposit' ? '+' : '-'
+              }}{{ formatCurrency(transaction.amount) }}
+            </span>
           </div>
         </li>
       </ul>
@@ -126,7 +154,10 @@
           <button
             v-for="page in totalPages"
             :key="page"
-            :class="[ 'px-4 py-2 rounded', currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200' ]"
+            :class="[
+              'px-4 py-2 rounded',
+              currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200',
+            ]"
             @click="goToPage(page)"
             aria-label="Go to page {{ page }}"
           >
@@ -148,7 +179,8 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useStore } from 'vuex'
 import { fetchMockTransactions } from '../api/transactions'
 
 export default {
@@ -163,9 +195,11 @@ export default {
       default: 10,
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
+    const _store = useStore() // Changed to _store since it's unused
     const transactions = ref([])
     const loading = ref(true)
+    const error = ref(null)
     const currentPage = ref(props.page)
 
     // Filter states
@@ -173,46 +207,40 @@ export default {
     const endDate = ref('')
     const typeFilter = ref('')
 
-    // New transaction data (for creating a transaction)
+    // New transaction data
     const newTransaction = ref({
       date: '',
       amount: '',
       type: '',
     })
 
-    // Debounced fetch
-    const debounce = (fn, delay) => {
-      let timeout
-      return function (...args) {
-        clearTimeout(timeout)
-        timeout = setTimeout(() => fn(...args), delay)
-      }
-    }
-
     const fetchTransactions = async () => {
       try {
         const data = await fetchMockTransactions()
         transactions.value = data
-        loading.value = false
-      } catch (error) {
-        console.error('Error fetching transactions:', error)
+      } catch (_err) {
+        // Changed to _err since it's unused
+        error.value = 'Failed to load transactions. Please try again later.'
+      } finally {
         loading.value = false
       }
     }
 
-    const debouncedFetch = debounce(fetchTransactions, 500)
+    const formatDate = dateString => {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    }
 
-    // Watch for page changes
-    watch(
-      () => props.page,
-      (newPage) => {
-        currentPage.value = newPage
-      },
-    )
+    const formatCurrency = amount => {
+      return `KES ${parseFloat(amount).toLocaleString()}`
+    }
 
     // Filtered transactions
     const filteredTransactions = computed(() => {
-      return transactions.value.filter((transaction) => {
+      return transactions.value.filter(transaction => {
         const matchesDate =
           (!startDate.value || transaction.date >= startDate.value) &&
           (!endDate.value || transaction.date <= endDate.value)
@@ -239,49 +267,51 @@ export default {
     const previousPage = () => {
       if (currentPage.value > 1) {
         currentPage.value--
-        emitPageChange()
+        emit('changePage', currentPage.value)
       }
     }
 
     const nextPage = () => {
       if (currentPage.value < totalPages.value) {
         currentPage.value++
-        emitPageChange()
+        emit('changePage', currentPage.value)
       }
     }
 
-    const goToPage = (page) => {
+    const goToPage = page => {
       currentPage.value = page
-      emitPageChange()
-    }
-
-    const emitPageChange = () => {
-      this.$emit('changePage', currentPage.value)
+      emit('changePage', currentPage.value)
     }
 
     // Submit new transaction
     const submitTransaction = () => {
       const { date, amount, type } = newTransaction.value
-      if (date && amount && type) {
-        const newTxn = {
-          id: transactions.value.length + 1, // Assuming simple id generation
-          date,
-          amount: parseFloat(amount).toFixed(2),
-          type,
-        }
-        transactions.value.push(newTxn) // Add transaction to list
-        resetForm() // Reset form after submission
-      } else {
-        alert('Please fill out all fields.')
+
+      if (!date || !amount || !type) {
+        error.value = 'Please fill out all required fields'
+        return
       }
-    }
 
-    // Reset form after submission
-    const resetForm = () => {
+      if (parseFloat(amount) <= 0) {
+        error.value = 'Amount must be greater than 0'
+        return
+      }
+
+      const newTxn = {
+        id: Date.now(),
+        date,
+        amount: parseFloat(amount).toFixed(2),
+        type,
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+      }
+
+      transactions.value.unshift(newTxn)
       newTransaction.value = { date: '', amount: '', type: '' }
+      error.value = null
     }
 
-    // Fetch transactions when component mounts
+    // Fetch transactions on mount
     onMounted(() => {
       fetchTransactions()
     })
@@ -289,6 +319,7 @@ export default {
     return {
       filteredTransactions,
       loading,
+      error,
       paginatedTransactions,
       currentPage,
       totalPages,
@@ -300,14 +331,14 @@ export default {
       typeFilter,
       newTransaction,
       submitTransaction,
-      debouncedFetch
+      formatDate,
+      formatCurrency,
     }
   },
 }
 </script>
 
 <style scoped>
-/* Styling for mobile-first approach */
 .spinner {
   border: 4px solid transparent;
   border-top: 4px solid #3498db;
@@ -315,10 +346,15 @@ export default {
   animation: spin 1s linear infinite;
   width: 30px;
   height: 30px;
+  margin: 0 auto;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
