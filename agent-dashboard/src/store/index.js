@@ -1,6 +1,7 @@
 // src/store/index.js
 import { createStore } from 'vuex'
 import { fetchMockTransactions } from '../api/transactions'
+import logger from '../services/logger'
 
 export default createStore({
   state: {
@@ -12,7 +13,7 @@ export default createStore({
       phone: '',
       location: '',
       joinDate: '',
-      status: ''
+      status: '',
     },
     notifications: [],
     dashboardStats: {
@@ -21,16 +22,16 @@ export default createStore({
       pendingTransactions: 0,
       commissionEarned: 0,
       monthlyTarget: 5000,
-      dailyTarget: 50
-    }
+      dailyTarget: 50,
+    },
+    errors: [],
   },
   mutations: {
     setTransactions(state, transactions) {
       state.transactions = transactions
     },
     addTransaction(state, transaction) {
-      state.transactions.unshift(transaction) // Add to beginning for recent transactions
-      // Update dashboard stats
+      state.transactions.unshift(transaction)
       state.dashboardStats.todayTransactions += 1
       if (transaction.status === 'pending') {
         state.dashboardStats.pendingTransactions += 1
@@ -53,17 +54,16 @@ export default createStore({
     },
     addNotification(state, notification) {
       const newNotification = {
-        id: Date.now() + Math.random(), // More unique ID
+        id: Date.now() + Math.random(),
         type: notification.type || 'info',
         title: notification.title || '',
-        message: notification.message || notification, // Support both string and object
-        autoDismiss: notification.autoDismiss !== false, // Default to true
+        message: notification.message || notification,
+        autoDismiss: notification.autoDismiss !== false,
         duration: notification.duration || 5000,
         createdAt: Date.now(),
       }
       state.notifications.push(newNotification)
 
-      // Limit notifications to prevent memory issues
       if (state.notifications.length > 10) {
         state.notifications = state.notifications.slice(-10)
       }
@@ -76,33 +76,46 @@ export default createStore({
     },
     setDashboardStats(state, stats) {
       state.dashboardStats = { ...state.dashboardStats, ...stats }
-    }
+    },
+    addError(state, error) {
+      state.errors.push({
+        timestamp: new Date().toISOString(),
+        message: error.message || 'Unknown error occurred',
+        stack: error.stack || '',
+        context: error.context || '',
+      })
+    },
+    clearErrors(state) {
+      state.errors = []
+    },
   },
   actions: {
     async fetchTransactions({ commit, state }) {
       try {
-        // Only fetch if we don't have transactions already
         if (state.transactions.length === 0) {
           const transactions = await fetchMockTransactions()
           commit('setTransactions', transactions)
 
-          // Calculate dashboard stats from transactions
           const today = new Date().toISOString().split('T')[0]
           const todayTransactions = transactions.filter(t => t.date === today).length
           const pendingTransactions = transactions.filter(t => t.status === 'pending').length
 
           commit('setDashboardStats', {
             todayTransactions,
-            pendingTransactions
+            pendingTransactions,
           })
         }
       } catch (error) {
-        console.error('Error fetching transactions:', error)
+        commit('addError', {
+          message: 'Failed to fetch transactions',
+          stack: error.stack,
+          context: 'fetchTransactions action',
+        })
         commit('addNotification', {
           type: 'error',
           title: 'Error',
           message: 'Failed to fetch transactions. Please try again later.',
-          autoDismiss: true
+          autoDismiss: true,
         })
         throw error
       }
@@ -110,23 +123,20 @@ export default createStore({
 
     async fetchAgentProfile({ commit }) {
       try {
-        // Get current user from localStorage or auth service
         const userData = localStorage.getItem('userData')
         if (userData) {
           const user = JSON.parse(userData)
           commit('setAgentProfile', user)
 
-          // Update dashboard stats
           commit('setDashboardStats', {
             totalBalance: user.balance || 0,
             commissionEarned: 2150,
             monthlyTarget: 5000,
-            dailyTarget: 50
+            dailyTarget: 50,
           })
           return
         }
 
-        // Fallback to demo profile if no user data
         await new Promise(resolve => setTimeout(resolve, 500))
 
         const demoProfile = {
@@ -136,69 +146,72 @@ export default createStore({
           phone: '+254 700 000 000',
           location: 'Kenya',
           joinDate: new Date().toISOString().split('T')[0],
-          status: 'active'
+          status: 'active',
         }
         commit('setAgentProfile', demoProfile)
 
-        // Update dashboard stats
         commit('setDashboardStats', {
           totalBalance: demoProfile.balance,
           commissionEarned: 2150,
           monthlyTarget: 5000,
-          dailyTarget: 50
+          dailyTarget: 50,
         })
       } catch (error) {
-        console.error('Error fetching agent profile:', error)
+        commit('addError', {
+          message: 'Failed to fetch agent profile',
+          stack: error.stack,
+          context: 'fetchAgentProfile action',
+        })
         commit('addNotification', {
           type: 'error',
           title: 'Error',
           message: 'Failed to fetch agent profile.',
-          autoDismiss: true
+          autoDismiss: true,
         })
         throw error
       }
     },
 
-    addTransaction({ commit, state }, transaction) {
+    async addTransaction({ commit, state }, transaction) {
       try {
-        // Add transaction with additional metadata
         const enrichedTransaction = {
           ...transaction,
           id: transaction.id || Date.now(),
           createdAt: transaction.createdAt || new Date().toISOString(),
-          status: transaction.status || 'completed'
+          status: transaction.status || 'completed',
         }
 
         commit('addTransaction', enrichedTransaction)
 
-        // Update agent balance based on transaction type
         const amount = parseFloat(transaction.amount)
         const currentBalance = state.agentProfile.balance
         let newBalance = currentBalance
 
         if (transaction.type === 'deposit') {
-          newBalance += amount * 0.01 // 1% commission on deposits
+          newBalance += amount * 0.01
         } else if (transaction.type === 'withdrawal') {
-          newBalance += amount * 0.005 // 0.5% commission on withdrawals
+          newBalance += amount * 0.005
         }
 
         commit('updateAgentBalance', newBalance)
 
-        // Add success notification
         commit('addNotification', {
           type: 'success',
           title: 'Transaction Created',
-          message: `${transaction.type} of KES ${amount.toLocaleString()} has been processed successfully.`,
-          autoDismiss: true
+          message: `${transaction.type} of KES ${amount.toLocaleString()} processed successfully.`,
+          autoDismiss: true,
         })
-
       } catch (error) {
-        console.error('Error adding transaction:', error)
+        commit('addError', {
+          message: 'Failed to add transaction',
+          stack: error.stack,
+          context: JSON.stringify(transaction),
+        })
         commit('addNotification', {
           type: 'error',
           title: 'Transaction Failed',
           message: 'Failed to create transaction. Please try again.',
-          autoDismiss: true
+          autoDismiss: true,
         })
         throw error
       }
@@ -210,7 +223,7 @@ export default createStore({
         type: 'info',
         title: 'Transaction Updated',
         message: 'Transaction has been updated successfully.',
-        autoDismiss: true
+        autoDismiss: true,
       })
     },
 
@@ -220,11 +233,22 @@ export default createStore({
         type: 'warning',
         title: 'Transaction Deleted',
         message: 'Transaction has been deleted.',
-        autoDismiss: true
+        autoDismiss: true,
       })
     },
 
-    // Notification actions
+    logError({ commit }, error) {
+      commit('addError', {
+        message: error.message || 'Unknown error',
+        stack: error.stack || '',
+        context: error.context || '',
+      })
+
+      if (process.env.NODE_ENV === 'development') {
+        logger.error(error.message, error)
+      }
+    },
+
     showNotification({ commit }, notification) {
       commit('addNotification', notification)
     },
@@ -235,17 +259,21 @@ export default createStore({
 
     clearAllNotifications({ commit }) {
       commit('clearNotifications')
-    }
+    },
+
+    clearAllErrors({ commit }) {
+      commit('clearErrors')
+    },
   },
   getters: {
-    getTransactions: (state) => state.transactions,
-    getTransactionById: (state) => (id) => {
+    getTransactions: state => state.transactions,
+    getTransactionById: state => id => {
       return state.transactions.find(transaction => transaction.id === id)
     },
-    getTransactionsByType: (state) => (type) => {
+    getTransactionsByType: state => type => {
       return state.transactions.filter(transaction => transaction.type === type)
     },
-    getTransactionsByDateRange: (state) => (startDate, endDate) => {
+    getTransactionsByDateRange: state => (startDate, endDate) => {
       return state.transactions.filter(transaction => {
         const transactionDate = new Date(transaction.date)
         const start = new Date(startDate)
@@ -253,19 +281,22 @@ export default createStore({
         return transactionDate >= start && transactionDate <= end
       })
     },
-    getAgentProfile: (state) => state.agentProfile,
-    getNotifications: (state) => state.notifications,
-    getDashboardStats: (state) => state.dashboardStats,
-    getTotalTransactionAmount: (state) => (type) => {
+    getAgentProfile: state => state.agentProfile,
+    getNotifications: state => state.notifications,
+    getDashboardStats: state => state.dashboardStats,
+    getTotalTransactionAmount: state => type => {
       return state.transactions
         .filter(t => !type || t.type === type)
         .reduce((total, transaction) => total + parseFloat(transaction.amount), 0)
     },
-    getRecentTransactions: (state) => (limit = 5) => {
-      return state.transactions
-        .slice()
-        .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-        .slice(0, limit)
-    }
+    getRecentTransactions:
+      state =>
+        (limit = 5) => {
+          return state.transactions
+            .slice()
+            .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+            .slice(0, limit)
+        },
+    getErrors: state => state.errors,
   },
 })
