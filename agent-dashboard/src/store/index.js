@@ -8,6 +8,11 @@ export default createStore({
     agentProfile: {
       name: 'Agent Name',
       balance: 0,
+      agentId: '',
+      phone: '',
+      location: '',
+      joinDate: '',
+      status: ''
     },
     notifications: [],
     dashboardStats: {
@@ -57,7 +62,7 @@ export default createStore({
         createdAt: Date.now(),
       }
       state.notifications.push(newNotification)
-      
+
       // Limit notifications to prevent memory issues
       if (state.notifications.length > 10) {
         state.notifications = state.notifications.slice(-10)
@@ -80,12 +85,12 @@ export default createStore({
         if (state.transactions.length === 0) {
           const transactions = await fetchMockTransactions()
           commit('setTransactions', transactions)
-          
+
           // Calculate dashboard stats from transactions
           const today = new Date().toISOString().split('T')[0]
           const todayTransactions = transactions.filter(t => t.date === today).length
           const pendingTransactions = transactions.filter(t => t.status === 'pending').length
-          
+
           commit('setDashboardStats', {
             todayTransactions,
             pendingTransactions
@@ -102,26 +107,42 @@ export default createStore({
         throw error
       }
     },
-    
+
     async fetchAgentProfile({ commit }) {
       try {
-        // Simulate API call
+        // Get current user from localStorage or auth service
+        const userData = localStorage.getItem('userData')
+        if (userData) {
+          const user = JSON.parse(userData)
+          commit('setAgentProfile', user)
+
+          // Update dashboard stats
+          commit('setDashboardStats', {
+            totalBalance: user.balance || 0,
+            commissionEarned: 2150,
+            monthlyTarget: 5000,
+            dailyTarget: 50
+          })
+          return
+        }
+
+        // Fallback to demo profile if no user data
         await new Promise(resolve => setTimeout(resolve, 500))
-        
-        const mockProfile = { 
-          name: 'Richard Karoki', 
-          balance: 45250,
-          agentId: 'AG001',
-          phone: '+254 700 123 456',
-          location: 'Nairobi, Kenya',
-          joinDate: '2023-01-15',
+
+        const demoProfile = {
+          name: 'Demo Agent',
+          balance: 10000,
+          agentId: 'AG000',
+          phone: '+254 700 000 000',
+          location: 'Kenya',
+          joinDate: new Date().toISOString().split('T')[0],
           status: 'active'
         }
-        commit('setAgentProfile', mockProfile)
-        
+        commit('setAgentProfile', demoProfile)
+
         // Update dashboard stats
         commit('setDashboardStats', {
-          totalBalance: mockProfile.balance,
+          totalBalance: demoProfile.balance,
           commissionEarned: 2150,
           monthlyTarget: 5000,
           dailyTarget: 50
@@ -137,7 +158,7 @@ export default createStore({
         throw error
       }
     },
-    
+
     addTransaction({ commit, state }, transaction) {
       try {
         // Add transaction with additional metadata
@@ -147,22 +168,22 @@ export default createStore({
           createdAt: transaction.createdAt || new Date().toISOString(),
           status: transaction.status || 'completed'
         }
-        
+
         commit('addTransaction', enrichedTransaction)
-        
+
         // Update agent balance based on transaction type
         const amount = parseFloat(transaction.amount)
         const currentBalance = state.agentProfile.balance
         let newBalance = currentBalance
-        
+
         if (transaction.type === 'deposit') {
           newBalance += amount * 0.01 // 1% commission on deposits
         } else if (transaction.type === 'withdrawal') {
           newBalance += amount * 0.005 // 0.5% commission on withdrawals
         }
-        
+
         commit('updateAgentBalance', newBalance)
-        
+
         // Add success notification
         commit('addNotification', {
           type: 'success',
@@ -170,7 +191,7 @@ export default createStore({
           message: `${transaction.type} of KES ${amount.toLocaleString()} has been processed successfully.`,
           autoDismiss: true
         })
-        
+
       } catch (error) {
         console.error('Error adding transaction:', error)
         commit('addNotification', {
@@ -182,7 +203,7 @@ export default createStore({
         throw error
       }
     },
-    
+
     updateTransaction({ commit }, transaction) {
       commit('updateTransaction', transaction)
       commit('addNotification', {
@@ -192,7 +213,7 @@ export default createStore({
         autoDismiss: true
       })
     },
-    
+
     deleteTransaction({ commit }, transactionId) {
       commit('deleteTransaction', transactionId)
       commit('addNotification', {
@@ -202,16 +223,16 @@ export default createStore({
         autoDismiss: true
       })
     },
-    
+
     // Notification actions
     showNotification({ commit }, notification) {
       commit('addNotification', notification)
     },
-    
+
     dismissNotification({ commit }, notificationId) {
       commit('removeNotification', notificationId)
     },
-    
+
     clearAllNotifications({ commit }) {
       commit('clearNotifications')
     }
