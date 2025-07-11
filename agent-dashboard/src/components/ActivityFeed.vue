@@ -25,15 +25,15 @@
 
     <!-- Activity List -->
     <div v-else class="space-y-4">
-      <div 
-        v-for="activity in activities" 
+      <div
+        v-for="activity in activities"
         :key="activity.id"
         class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
       >
         <div :class="['w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0', getActivityIconBg(activity.type)]">
           <component :is="getActivityIcon(activity.type)" :class="['w-4 h-4', getActivityIconColor(activity.type)]" />
         </div>
-        
+
         <div class="flex-1 min-w-0">
           <p class="text-sm text-gray-900">
             <span class="font-medium">{{ activity.title }}</span>
@@ -41,7 +41,7 @@
           <p class="text-xs text-gray-500 mt-1">{{ activity.description }}</p>
           <p class="text-xs text-gray-400 mt-1">{{ formatTime(activity.timestamp) }}</p>
         </div>
-        
+
         <div v-if="activity.amount" :class="['text-sm font-semibold', getAmountColor(activity.type)]">
           {{ formatAmount(activity.amount, activity.type) }}
         </div>
@@ -63,19 +63,19 @@ import { ref, onMounted } from 'vue'
 
 // Activity Icons
 const TransactionIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>`
+  template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path></svg>'
 }
 
 const UserIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`
+  template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
 }
 
 const AlertIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>`
+  template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>'
 }
 
 const CheckIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+  template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
 }
 
 export default {
@@ -126,62 +126,62 @@ export default {
 
     const getActivityIcon = (type) => {
       switch (type) {
-        case 'deposit':
-        case 'withdrawal':
-          return TransactionIcon
-        case 'login':
-          return UserIcon
-        case 'alert':
-          return AlertIcon
-        case 'success':
-          return CheckIcon
-        default:
-          return TransactionIcon
+      case 'deposit':
+      case 'withdrawal':
+        return TransactionIcon
+      case 'login':
+        return UserIcon
+      case 'alert':
+        return AlertIcon
+      case 'success':
+        return CheckIcon
+      default:
+        return TransactionIcon
       }
     }
 
     const getActivityIconBg = (type) => {
       switch (type) {
-        case 'deposit':
-          return 'bg-green-100'
-        case 'withdrawal':
-          return 'bg-red-100'
-        case 'login':
-          return 'bg-blue-100'
-        case 'alert':
-          return 'bg-yellow-100'
-        case 'success':
-          return 'bg-green-100'
-        default:
-          return 'bg-gray-100'
+      case 'deposit':
+        return 'bg-green-100'
+      case 'withdrawal':
+        return 'bg-red-100'
+      case 'login':
+        return 'bg-blue-100'
+      case 'alert':
+        return 'bg-yellow-100'
+      case 'success':
+        return 'bg-green-100'
+      default:
+        return 'bg-gray-100'
       }
     }
 
     const getActivityIconColor = (type) => {
       switch (type) {
-        case 'deposit':
-          return 'text-green-600'
-        case 'withdrawal':
-          return 'text-red-600'
-        case 'login':
-          return 'text-blue-600'
-        case 'alert':
-          return 'text-yellow-600'
-        case 'success':
-          return 'text-green-600'
-        default:
-          return 'text-gray-600'
+      case 'deposit':
+        return 'text-green-600'
+      case 'withdrawal':
+        return 'text-red-600'
+      case 'login':
+        return 'text-blue-600'
+      case 'alert':
+        return 'text-yellow-600'
+      case 'success':
+        return 'text-green-600'
+      default:
+        return 'text-gray-600'
       }
     }
 
     const getAmountColor = (type) => {
       switch (type) {
-        case 'deposit':
-          return 'text-green-600'
-        case 'withdrawal':
-          return 'text-red-600'
-        default:
-          return 'text-gray-600'
+      case 'deposit':
+        return 'text-green-600'
+      case 'withdrawal':
+        return 'text-red-600'
+      default:
+        return 'text-gray-600'
       }
     }
 
