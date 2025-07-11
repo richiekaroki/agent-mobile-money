@@ -2,18 +2,33 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-lg font-semibold text-gray-900 flex items-center">
-        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        <svg
+          class="w-5 h-5 mr-2 text-blue-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
         </svg>
         Recent Transactions
       </h2>
-      <router-link 
-        to="/transactions" 
+      <router-link
+        to="/transactions"
         class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center transition-colors duration-200"
       >
         View all
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
         </svg>
       </router-link>
     </div>
@@ -34,39 +49,51 @@
 
     <!-- No Transactions -->
     <div v-else-if="recentTransactions.length === 0" class="text-center py-8">
-      <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      <svg
+        class="w-12 h-12 text-gray-400 mx-auto mb-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        ></path>
       </svg>
       <p class="text-gray-500">No recent transactions</p>
     </div>
 
     <!-- Transaction List -->
     <div v-else class="space-y-1">
-      <div 
-        v-for="transaction in recentTransactions" 
+      <div
+        v-for="transaction in recentTransactions"
         :key="transaction.id"
         class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer group"
         @click="$emit('selectTransaction', transaction)"
       >
         <div class="flex items-center space-x-3">
           <!-- Transaction Icon -->
-          <div :class="[
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            getTransactionIconClass(transaction.type)
-          ]">
+          <div
+            :class="[
+              'w-10 h-10 rounded-full flex items-center justify-center',
+              getTransactionIconClass(transaction.type),
+            ]"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path 
-                v-if="transaction.type === 'deposit'" 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="2" 
+              <path
+                v-if="transaction.type === 'deposit'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"
               ></path>
-              <path 
-                v-else 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="2" 
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
                 d="M20 12H4"
               ></path>
             </svg>
@@ -85,23 +112,37 @@
 
         <!-- Amount and Status -->
         <div class="text-right">
-          <p :class="[
-            'text-sm font-semibold',
-            transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
-          ]">
+          <p
+            :class="[
+              'text-sm font-semibold',
+              transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600',
+            ]"
+          >
             {{ transaction.type === 'deposit' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
           </p>
-          <span :class="[
-            'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-            getStatusClass(transaction.status || 'completed')
-          ]">
+          <span
+            :class="[
+              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+              getStatusClass(transaction.status || 'completed'),
+            ]"
+          >
             {{ transaction.status || 'completed' }}
           </span>
         </div>
 
         <!-- Arrow Icon -->
-        <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        <svg
+          class="w-4 h-4 text-gray-400 group-hover:text-gray-600 ml-2 transition-colors duration-200"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
         </svg>
       </div>
     </div>
@@ -118,9 +159,10 @@ export default {
   setup() {
     const store = useStore()
     const loading = ref(true)
+    const error = ref(null)
 
     const transactions = computed(() => store.getters.getTransactions)
-    
+
     const recentTransactions = computed(() => {
       return transactions.value
         .slice()
@@ -128,26 +170,24 @@ export default {
         .slice(0, 5)
     })
 
-    const getTransactionIconClass = (type) => {
-      return type === 'deposit' 
-        ? 'bg-green-100 text-green-600' 
-        : 'bg-red-100 text-red-600'
+    const getTransactionIconClass = type => {
+      return type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
     }
 
-    const getStatusClass = (status) => {
+    const getStatusClass = status => {
       switch (status) {
-        case 'completed':
-          return 'bg-green-100 text-green-800'
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-800'
-        case 'failed':
-          return 'bg-red-100 text-red-800'
-        default:
-          return 'bg-gray-100 text-gray-800'
+      case 'completed':
+        return 'bg-green-100 text-green-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'failed':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
       }
     }
 
-    const formatDate = (dateString) => {
+    const formatDate = dateString => {
       const date = new Date(dateString)
       const now = new Date()
       const diffTime = Math.abs(now - date)
@@ -160,14 +200,14 @@ export default {
       } else if (diffDays <= 7) {
         return `${diffDays - 1} days ago`
       } else {
-        return date.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
         })
       }
     }
 
-    const formatCurrency = (amount) => {
+    const formatCurrency = amount => {
       return `KES ${parseFloat(amount).toLocaleString()}`
     }
 
@@ -176,8 +216,9 @@ export default {
         if (transactions.value.length === 0) {
           await store.dispatch('fetchTransactions')
         }
-      } catch (error) {
-        console.error('Error fetching transactions:', error)
+      } catch (err) {
+        error.value = 'Failed to load transactions'
+        store.dispatch('logError', err) // Add this action to your Vuex store
       } finally {
         setTimeout(() => {
           loading.value = false
@@ -187,12 +228,13 @@ export default {
 
     return {
       loading,
+      error,
       recentTransactions,
       getTransactionIconClass,
       getStatusClass,
       formatDate,
-      formatCurrency
+      formatCurrency,
     }
-  }
+  },
 }
 </script>
