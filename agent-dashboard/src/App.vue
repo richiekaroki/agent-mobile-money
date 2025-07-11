@@ -17,8 +17,8 @@
 
           <!-- Navigation Links -->
           <nav class="hidden md:flex space-x-1" role="navigation">
-            <router-link 
-              to="/" 
+            <router-link
+              to="/"
               class="nav-link"
               :class="{ 'nav-link-active': $route.path === '/' }"
               aria-label="Go to Dashboard"
@@ -29,8 +29,8 @@
               </svg>
               Dashboard
             </router-link>
-            <router-link 
-              to="/transactions" 
+            <router-link
+              to="/transactions"
               class="nav-link"
               :class="{ 'nav-link-active': $route.path === '/transactions' }"
               aria-label="Go to Transactions"
@@ -50,7 +50,7 @@
                 <p class="text-sm font-medium text-gray-900">{{ currentUser.name || 'Agent User' }}</p>
                 <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
               </div>
-              <button 
+              <button
                 @click="logout"
                 class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 title="Logout"
@@ -62,7 +62,7 @@
             </div>
 
             <!-- Mobile menu button -->
-          <button 
+          <button
             @click="toggleMobileMenu"
             class="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Toggle mobile menu"
@@ -77,8 +77,8 @@
         <!-- Mobile Navigation -->
         <div v-if="showMobileMenu" class="md:hidden py-4 border-t border-gray-200 animate-fade-in">
           <div class="flex flex-col space-y-2">
-            <router-link 
-              to="/" 
+            <router-link
+              to="/"
               class="mobile-nav-link"
               :class="{ 'mobile-nav-link-active': $route.path === '/' }"
               @click="closeMobileMenu"
@@ -89,8 +89,8 @@
               </svg>
               Dashboard
             </router-link>
-            <router-link 
-              to="/transactions" 
+            <router-link
+              to="/transactions"
               class="mobile-nav-link"
               :class="{ 'mobile-nav-link-active': $route.path === '/transactions' }"
               @click="closeMobileMenu"
@@ -100,7 +100,7 @@
               </svg>
               Transactions
             </router-link>
-            
+
             <!-- Mobile User Info -->
             <div class="border-t border-gray-200 pt-4 mt-4">
               <div class="flex items-center justify-between">
@@ -108,7 +108,7 @@
                   <p class="text-sm font-medium text-gray-900">{{ currentUser.name || 'Agent User' }}</p>
                   <p class="text-xs text-gray-500">{{ currentUser.agentId }}</p>
                 </div>
-                <button 
+                <button
                   @click="logout"
                   class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   title="Logout"
@@ -132,7 +132,7 @@
       <router-view />
     </main>
   </div>
-  
+
   <!-- Auth Route (Full Screen) -->
   <div v-else>
     <router-view />
@@ -178,7 +178,7 @@ export default {
         localStorage.removeItem('authToken')
         localStorage.removeItem('userData')
         localStorage.removeItem('userData')
-        
+
         // Clear store
         store.commit('setAgentProfile', {
           name: '',
@@ -189,10 +189,10 @@ export default {
           joinDate: '',
           status: ''
         })
-        
+
         // Redirect to auth
         router.push('/auth')
-        
+
         // Show notification
         store.dispatch('showNotification', {
           type: 'info',
