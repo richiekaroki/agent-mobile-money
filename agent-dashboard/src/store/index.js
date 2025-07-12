@@ -123,7 +123,7 @@ export default createStore({
 
     async fetchAgentProfile({ commit }) {
       try {
-        const userData = localStorage.getItem('userData')
+        const userData = localStorage.getItem('mobicash_user_data') || localStorage.getItem('userData')
         if (userData) {
           const user = JSON.parse(userData)
           commit('setAgentProfile', user)

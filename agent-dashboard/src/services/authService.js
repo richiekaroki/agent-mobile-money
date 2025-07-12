@@ -334,6 +334,7 @@ class AuthService {
 
     localStorage.setItem(this.tokenKey, accessToken)
     localStorage.setItem(this.userKey, JSON.stringify(sessionData.user))
+    localStorage.setItem('userData', JSON.stringify(sessionData.user)) // Add this line for compatibility
 
     if (rememberMe) {
       localStorage.setItem(this.refreshTokenKey, refreshToken)
