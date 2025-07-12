@@ -1,7 +1,6 @@
 // src/store/index.js
 import { createStore } from 'vuex'
 import { fetchMockTransactions } from '../api/transactions'
-import logger from '../services/logger'
 
 export default createStore({
   state: {
