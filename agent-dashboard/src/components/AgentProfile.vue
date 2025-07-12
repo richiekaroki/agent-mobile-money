@@ -215,7 +215,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import authService from '../services/authService'
-import logger from '../services/logger'
 
 export default {
   name: 'AgentProfile',
