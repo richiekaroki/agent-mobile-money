@@ -150,12 +150,69 @@
       <TransactionChart :period="selectedPeriod" />
     </div>
 
-    <!-- New Transaction Modal -->
+    <!-- Transaction Modal -->
     <TransactionModal
       v-if="showNewTransactionModal"
       @close="showNewTransactionModal = false"
-      @success="handleTransactionSuccess"
+      @transaction-added="handleTransactionSuccess"
     />
+
+    <!-- Customer Support Modal -->
+    <div v-if="showCustomerSupport" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-full max-w-6xl mx-4 max-h-screen overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-xl font-bold text-gray-800">Customer Support</h2>
+          <button
+            @click="closeModal"
+            class="text-gray-400 hover:text-gray-600 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+          <CustomerSupport @notification="addNotification" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div v-if="showSettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-screen overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-xl font-bold text-gray-800">Settings</h2>
+          <button
+            @click="closeModal"
+            class="text-gray-400 hover:text-gray-600 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+          <Settings @notification="addNotification" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Generation Modal -->
+    <div v-if="showReportGeneration" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-full max-w-6xl mx-4 max-h-screen overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-xl font-bold text-gray-800">Report Generation</h2>
+          <button
+            @click="closeModal"
+            class="text-gray-400 hover:text-gray-600 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        <div class="p-6 max-h-96 overflow-y-auto">
+          <ReportGeneration @notification="addNotification" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <NotificationComponent />
   </div>
 </template>
 
@@ -167,6 +224,10 @@ import QuickActions from '../components/QuickActions.vue'
 import SkeletonCard from '../components/SkeletonCard.vue'
 import StatCard from '../components/StatCard.vue'
 import TransactionModal from '../components/TransactionModal.vue'
+import NotificationComponent from '../components/NotificationComponent.vue'
+import CustomerSupport from '../components/CustomerSupport.vue'
+import Settings from '../components/Settings.vue'
+import ReportGeneration from '../components/ReportGeneration.vue'
 
 // Icons (you can replace these with actual icon components)
 const WalletIcon = {
@@ -212,17 +273,24 @@ export default {
     AgentProfile: () => import('../components/AgentProfile.vue'),
     TransactionChart: () => import('../components/TransactionChart.vue'),
     RecentTransactions: () => import('../components/RecentTransactions.vue'),
+    NotificationComponent,
+    CustomerSupport,
+    Settings,
+    ReportGeneration,
   },
   setup() {
-    const _store = useStore() // Changed to _store since it's unused
+    const store = useStore()
     const loading = ref(true)
     const refreshing = ref(false)
     const showNewTransactionModal = ref(false)
+    const showCustomerSupport = ref(false)
+    const showSettings = ref(false)
+    const showReportGeneration = ref(false)
     const selectedPeriod = ref('7d')
 
     // Computed properties
-    const dashboardStats = computed(() => _store.getters.getDashboardStats)
-    const agentProfile = computed(() => _store.getters.getAgentProfile)
+    const dashboardStats = computed(() => store.getters.getDashboardStats)
+    const agentProfile = computed(() => store.getters.getAgentProfile)
     const agentName = computed(() => agentProfile.value.name || 'Agent')
 
     const chartPeriods = [
@@ -235,11 +303,10 @@ export default {
     const loadDashboardData = async () => {
       try {
         // Fetch data from store
-        await _store.dispatch('fetchTransactions')
-        await _store.dispatch('fetchAgentProfile')
-      } catch (_error) {
-        // Changed to _error since it's unused
-        _store.dispatch('showNotification', {
+        await store.dispatch('fetchTransactions')
+        await store.dispatch('fetchAgentProfile')
+      } catch (error) {
+        store.dispatch('showNotification', {
           type: 'error',
           title: 'Error Loading Data',
           message: 'Failed to load dashboard data. Please try again later.',
@@ -260,33 +327,29 @@ export default {
 
     const handleQuickAction = actionId => {
       switch (actionId) {
-      case 'new-transaction':
-        showNewTransactionModal.value = true
-        break
-      case 'generate-report':
-        _store.dispatch('showNotification', {
-          type: 'info',
-          title: 'Report Generation',
-          message: 'Report generation feature coming soon!',
-          autoDismiss: true,
-        })
-        break
-      case 'customer-support':
-        _store.dispatch('showNotification', {
-          type: 'info',
-          title: 'Customer Support',
-          message: 'Redirecting to customer support...',
-          autoDismiss: true,
-        })
-        break
-      case 'settings':
-        _store.dispatch('showNotification', {
-          type: 'info',
-          title: 'Settings',
-          message: 'Settings panel coming soon!',
-          autoDismiss: true,
-        })
-        break
+        case 'deposit':
+          showNewTransactionModal.value = true
+          break
+        case 'withdraw':
+          showNewTransactionModal.value = true
+          break
+        case 'support':
+          showCustomerSupport.value = true
+          break
+        case 'reports':
+          showReportGeneration.value = true
+          break
+        case 'profile':
+          store.dispatch('showNotification', {
+            type: 'info',
+            title: 'Profile Update',
+            message: 'Profile update feature coming soon!',
+            autoDismiss: true,
+          })
+          break
+        case 'settings':
+          showSettings.value = true
+          break
       }
     }
 
@@ -297,7 +360,7 @@ export default {
 
     const handleTransactionSuccess = () => {
       showNewTransactionModal.value = false
-      _store.dispatch('showNotification', {
+      store.dispatch('showNotification', {
         type: 'success',
         title: 'Transaction Created',
         message: 'Your transaction has been successfully created.',
@@ -307,17 +370,38 @@ export default {
       refreshData() // Refresh data to show the new transaction
     }
 
+    const addNotification = (notification) => {
+      store.dispatch('showNotification', notification)
+    }
+
+    const openTransactionModal = (type) => {
+      showNewTransactionModal.value = true
+      // The transaction modal will handle the type
+    }
+
+    const closeModal = () => {
+      showCustomerSupport.value = false
+      showSettings.value = false
+      showReportGeneration.value = false
+    }
+
     return {
       loading,
       refreshing,
       dashboardStats,
       agentName,
       showNewTransactionModal,
+      showCustomerSupport,
+      showSettings,
+      showReportGeneration,
       refreshData,
       handleQuickAction,
       selectedPeriod,
       chartPeriods,
       handleTransactionSuccess,
+      addNotification,
+      openTransactionModal,
+      closeModal,
       WalletIcon,
       CreditCardIcon,
       ClockIcon,

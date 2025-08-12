@@ -669,3 +669,63 @@ export default {
   },
 }
 </script>
+<template>
+  <div class="transactions-container">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Transactions</h1>
+      <p class="text-gray-600">Manage and view all your transaction history</p>
+    </div>
+
+    <!-- Transaction List -->
+    <div class="bg-white rounded-lg shadow">
+      <TransactionList />
+    </div>
+
+    <!-- Transaction Modal -->
+    <TransactionModal />
+
+    <!-- Transaction Detail Modal -->
+    <TransactionDetailModal />
+  </div>
+</template>
+
+<script>
+import TransactionList from '../components/TransactionList.vue'
+import TransactionModal from '../components/TransactionModal.vue'
+import TransactionDetailModal from '../components/TransactionDetailModal.vue'
+
+export default {
+  name: 'TransactionsView',
+  components: {
+    TransactionList,
+    TransactionModal,
+    TransactionDetailModal
+  },
+  async mounted() {
+    try {
+      // Ensure transactions are loaded
+      await this.$store.dispatch('fetchTransactions')
+    } catch (error) {
+      console.error('Error loading transactions:', error)
+      this.$store.dispatch('showNotification', {
+        type: 'error',
+        title: 'Loading Error',
+        message: 'Failed to load transactions. Please refresh the page.',
+        autoDismiss: true
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+.transactions-container {
+  @apply p-6 max-w-7xl mx-auto;
+}
+
+@media (max-width: 768px) {
+  .transactions-container {
+    @apply p-4;
+  }
+}
+</style>

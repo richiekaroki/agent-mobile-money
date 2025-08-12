@@ -343,7 +343,6 @@ class AuthService {
 
   // Remove sensitive data from user object
   sanitizeUser(user) {
-    // eslint-disable-next-line no-unused-vars
     const { passwordHash, passwordSalt, loginAttempts, lockedUntil, ...sanitizedUser } = user
     return sanitizedUser
   }
@@ -745,8 +744,7 @@ class AuthService {
   }
 }
 
-// Export the class for ES6 modules
-export default AuthService
-
-// Alternative: Export as CommonJS for Node.js compatibility
-// module.exports = AuthService
+// Create and export instance
+const authService = new AuthService()
+export { authService }
+export default authService

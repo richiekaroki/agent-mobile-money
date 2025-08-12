@@ -2,6 +2,19 @@
 import { createStore } from 'vuex'
 import { fetchMockTransactions } from '../api/transactions'
 
+// Simple logger for development
+const logger = {
+  error: (message, error) => {
+    console.error(`[Store Error] ${message}:`, error)
+  },
+  warn: message => {
+    console.warn(`[Store Warning] ${message}`)
+  },
+  info: message => {
+    console.info(`[Store Info] ${message}`)
+  },
+}
+
 export default createStore({
   state: {
     transactions: [],
@@ -122,7 +135,8 @@ export default createStore({
 
     async fetchAgentProfile({ commit }) {
       try {
-        const userData = localStorage.getItem('mobicash_user_data') || localStorage.getItem('userData')
+        const userData =
+          localStorage.getItem('mobicash_user_data') || localStorage.getItem('userData')
         if (userData) {
           const user = JSON.parse(userData)
           commit('setAgentProfile', user)
@@ -290,12 +304,12 @@ export default createStore({
     },
     getRecentTransactions:
       state =>
-        (limit = 5) => {
-          return state.transactions
-            .slice()
-            .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-            .slice(0, limit)
-        },
+      (limit = 5) => {
+        return state.transactions
+          .slice()
+          .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+          .slice(0, limit)
+      },
     getErrors: state => state.errors,
   },
 })

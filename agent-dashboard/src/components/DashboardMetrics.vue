@@ -133,16 +133,75 @@ export default {
   name: 'DashboardMetrics',
   setup() {
     const store = useStore()
-    
+
     const dashboardStats = computed(() => store.getters.getDashboardStats)
-    
+
     const formatCurrency = (amount) => {
       return parseFloat(amount || 0).toLocaleString()
     }
-    
+
     return {
       dashboardStats,
       formatCurrency
+    }
+  }
+}
+</script>
+<template>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <StatCard
+      title="Total Balance"
+      :value="formatCurrency(dashboardStats.totalBalance)"
+      icon="💰"
+      trend="+5.2%"
+      trend-positive
+    />
+    <StatCard
+      title="Today's Transactions"
+      :value="dashboardStats.todayTransactions.toString()"
+      icon="📊"
+      trend="+12"
+      trend-positive
+    />
+    <StatCard
+      title="Pending Transactions"
+      :value="dashboardStats.pendingTransactions.toString()"
+      icon="⏳"
+      trend="-3"
+      trend-positive
+    />
+    <StatCard
+      title="Commission Earned"
+      :value="formatCurrency(dashboardStats.commissionEarned)"
+      icon="💎"
+      trend="+8.1%"
+      trend-positive
+    />
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import StatCard from './StatCard.vue'
+
+export default {
+  name: 'DashboardMetrics',
+  components: {
+    StatCard
+  },
+  computed: {
+    ...mapGetters(['getDashboardStats']),
+    dashboardStats() {
+      return this.getDashboardStats
+    }
+  },
+  methods: {
+    formatCurrency(amount) {
+      return new Intl.NumberFormat('en-KE', {
+        style: 'currency',
+        currency: 'KES',
+        minimumFractionDigits: 0
+      }).format(amount || 0)
     }
   }
 }
